@@ -1,6 +1,6 @@
 from .models import *
 from .session import get_session
-from .repositories import DutyRepository
+from .repositories import PostgresUserRepository, PostgresDutyRepository
 
 
 __all__ = [
@@ -8,5 +8,6 @@ __all__ = [
     'DutyORM',
     'IncidentORM',
     'get_session',
-    'DutyRepository'
+    'PostgresDutyRepository',
+    'PostgresUserRepository'
 ]

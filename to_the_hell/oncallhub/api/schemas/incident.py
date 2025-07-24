@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from uuid import UUID
 
-from duty import Duty
+from .duty import Duty
 
 
 class Incident(BaseModel):

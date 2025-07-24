@@ -5,4 +5,4 @@ from uuid import UUID
 class User(BaseModel):
     id: UUID
     name: str
-    telegram_id: UUID
+    telegram_nickname: str
