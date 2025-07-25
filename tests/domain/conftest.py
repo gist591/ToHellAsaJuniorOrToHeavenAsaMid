@@ -1,9 +1,10 @@
 import pytest
 from uuid import UUID
-from sqlalchemy.ext.asyncio import AsyncSession  # Исправлено!
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.pool import StaticPool
 
 from to_the_hell.oncallhub.infra.db import get_session
-from to_the_hell.oncallhub.infra.db.models.user import UserORM  # Добавьте импорт
+from to_the_hell.oncallhub.infra.db.models.user import UserORM
 
 
 class FakeUserRepostitory():
@@ -17,3 +18,12 @@ class FakeUserRepostitory():
         await self.session.commit()
         await self.session.refresh(user)
         return user
+
+
+@pytest.fixture
+async def async_session():
+    engine = create_async_engine(
+        'sqlite+aiosqlite:///:memory:',
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
