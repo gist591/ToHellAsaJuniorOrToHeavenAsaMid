@@ -1,9 +1,9 @@
 from datetime import datetime
+from uuid import UUID
+
+from infra.db import DutyORM, UserORM
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from api.schemas import User
-from infra.db import DutyORM, UserORM
-from uuid import UUID
 
 
 class PostgresDutyRepository:

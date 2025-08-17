@@ -1,5 +1,5 @@
 def make_property(attr):
-    private_attr = f'_{attr}'
+    private_attr = f"_{attr}"
 
     def getter(self):
         return getattr(self, private_attr)

@@ -1,9 +1,8 @@
-from sqlalchemy.orm import as_declarative, mapped_column, Mapped, declared_attr
-from sqlalchemy import Integer, String
+from sqlalchemy.orm import Mapped, as_declarative, declared_attr, mapped_column
 
 
 @as_declarative()
-class AbstractORM():
+class AbstractORM:
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
 
     @classmethod

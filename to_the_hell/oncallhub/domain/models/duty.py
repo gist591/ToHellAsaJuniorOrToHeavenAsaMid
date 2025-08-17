@@ -1,16 +1,16 @@
-from uuid import UUID
 from datetime import datetime
+from uuid import UUID
 
 from to_the_hell.oncallhub.domain.utils.properties_from_models import make_property
 
 
 class Duty:
-    id = make_property('id')
-    name = make_property('name')
-    user_id = make_property('user_id')
-    start_time = make_property('start_time')
-    end_time = make_property('end_time')
-    status = make_property('status')
+    id = make_property("id")
+    name = make_property("name")
+    user_id = make_property("user_id")
+    start_time = make_property("start_time")
+    end_time = make_property("end_time")
+    status = make_property("status")
 
     def __init__(self, id: UUID, name: str, user_id: UUID, start_time: datetime, end_time: datetime, status: bool):
         self._id = id
