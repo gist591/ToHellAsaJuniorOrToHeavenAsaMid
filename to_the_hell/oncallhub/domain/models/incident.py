@@ -1,5 +1,6 @@
 from datetime import datetime
 from uuid import UUID
+from typing import Optional, List
 
 from to_the_hell.oncallhub.domain.models.duty import Duty
 from to_the_hell.oncallhub.domain.utils.properties_from_models import make_property

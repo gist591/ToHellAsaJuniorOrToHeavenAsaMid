@@ -1,5 +1,7 @@
 from typing import Protocol
 from uuid import UUID
+from sqlalchemy.ext.asyncio import AsyncSession
+
 
 from to_the_hell.oncallhub.infra.db.models.user import UserORM
 

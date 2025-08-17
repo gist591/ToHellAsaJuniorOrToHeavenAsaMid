@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from infra.db import DutyORM, UserORM
+from . import DutyORM, UserORM
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
