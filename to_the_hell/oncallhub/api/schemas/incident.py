@@ -2,12 +2,12 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from .duty import Duty
+from .duty import DutySchema
 
 
-class Incident(BaseModel):
+class IncidentSchema(BaseModel):  # type: ignore[misc]
     id: UUID
     description: str
-    create_start: float
+    created_at: float
     status: bool
-    duty: Duty
+    duty: DutySchema | None

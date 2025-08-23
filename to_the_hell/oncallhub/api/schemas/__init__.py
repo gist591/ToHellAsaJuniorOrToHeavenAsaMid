@@ -1,9 +1,5 @@
-from .duty import Duty
-from .incident import Incident
-from .user import User
+from .duty import DutySchema
+from .incident import IncidentSchema
+from .user import UserSchema
 
-__all__ = [
-    "Duty",
-    "Incident",
-    "User"
-]
+__all__ = ["DutySchema", "IncidentSchema", "UserSchema"]

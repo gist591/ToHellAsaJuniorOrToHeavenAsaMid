@@ -1,50 +1,75 @@
-from datetime import datetime
-from uuid import UUID
+from datetime import UTC, datetime
 
-from . import DutyORM, UserORM
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from to_the_hell.oncallhub.domain.entities import Duty, User
+from to_the_hell.oncallhub.domain.repositories import (
+    BaseDutyRepository,
+    BaseUserRepository,
+)
+from to_the_hell.oncallhub.domain.value_objects import DutyId, TimeRange, UserId
 
-class PostgresDutyRepository:
+from . import DutyORM, UserORM
+
+
+class PostgresDutyRepository(BaseDutyRepository):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def create(self, user_id: UUID, start_time: datetime,
-        end_time: datetime) -> DutyORM:
-        duty = DutyORM(
-            user_id=user_id,
-            start_time=start_time,
-            end_time=end_time,
-            status=False
+    async def create(self, duty: Duty) -> Duty:
+        duty_orm = DutyORM()
+        duty_orm.user_id = int(str(duty.user_id))
+        duty_orm.start_time = duty.time_range.start
+        duty_orm.end_time = duty.time_range.end
+        duty_orm.status = duty.status
+
+        self.session.add(duty_orm)
+        await self.session.commit()
+        await self.session.refresh(duty_orm)
+        return Duty(
+            id=DutyId.from_string(str(duty_orm.id)),
+            user_id=UserId.from_string(str(duty_orm.user_id)),
+            time_range=TimeRange(duty_orm.start_time, duty_orm.end_time),
+            status=duty_orm.status,
         )
 
-        self.session.add(duty)
-        await self.session.commit()
-        await self.session.refresh(duty)
-        return duty
-
-    async def get_current_duty(self) -> DutyORM:
+    async def get_current_duty(self) -> Duty | None:
         stmt = select(DutyORM).where(
-            DutyORM.end_time >= datetime.now(),
-            datetime.now() >= DutyORM.start_time
+            DutyORM.end_time >= datetime.now(UTC),
+            datetime.now(UTC) >= DutyORM.start_time,
+            DutyORM.status,
         )
         res = await self.session.execute(stmt)
-        return res.scalar_one_or_none()
+        duty_orm = res.scalar_one_or_none()
 
+        if not duty_orm:
+            return None
 
-class PostgresUserRepository: # TODO: нарушение DRY с классом FakeUserRepository (tests/domain/services/confest.py)
-    def __init__(self, session:AsyncSession) -> None:
-        self.session = session
-
-    async def create(self, user_id: UUID, name: str, telegram_username: str) -> UserORM:
-        user = UserORM(
-            user_id=user_id,
-            name=name,
-            telegram_username=telegram_username
+        return Duty(
+            id=DutyId.from_string(str(duty_orm.id)),
+            user_id=UserId.from_string(str(duty_orm.user_id)),
+            time_range=TimeRange(duty_orm.start_time, duty_orm.end_time),
+            status=duty_orm.status,
         )
 
-        self.session.add(user)
+
+class PostgresUserRepository(BaseUserRepository):
+    """Repository for User on Postgres"""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def create(self, user: User) -> User:
+        user_orm = UserORM()
+        user_orm.name = user.name
+        user_orm.telegram_username = user.telegram_username
+
+        self.session.add(user_orm)
         await self.session.commit()
-        await self.session.refresh(user)
-        return user
+        await self.session.refresh(user_orm)
+        return User(
+            id=UserId.from_string(str(user_orm.id)),
+            name=user_orm.name,
+            telegram_username=user_orm.telegram_username,
+        )

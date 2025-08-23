@@ -1,4 +1,4 @@
-from .models import *
+from .models import DutyORM, IncidentORM, UserORM
 from .repositories import PostgresDutyRepository, PostgresUserRepository
 from .session import get_session
 
@@ -8,5 +8,5 @@ __all__ = [
     "PostgresDutyRepository",
     "PostgresUserRepository",
     "UserORM",
-    "get_session"
+    "get_session",
 ]

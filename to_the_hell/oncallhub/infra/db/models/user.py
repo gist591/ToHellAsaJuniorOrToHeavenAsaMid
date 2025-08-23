@@ -1,13 +1,16 @@
-from sqlalchemy.orm import (
-    Mapped,
-    mapped_column,
-)
+from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
 
 from .base import AbstractORM
+from .duty import DutyORM
 
 
 class UserORM(AbstractORM):
-    __tablename__ = "users"
+    @classmethod
+    @declared_attr  # type: ignore[misc]
+    def __tablename__(cls) -> str:
+        return "users"
 
     name: Mapped[str] = mapped_column()
     telegram_username: Mapped[str] = mapped_column(unique=True, nullable=False)
+
+    duties: Mapped[list[DutyORM]] = relationship(back_populates="user")

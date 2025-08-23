@@ -3,7 +3,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 
-class User(BaseModel):
+class UserSchema(BaseModel):  # type: ignore[misc]
     id: UUID
     name: str
-    telegram_nickname: str
+    telegram_username: str

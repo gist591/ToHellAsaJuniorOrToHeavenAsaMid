@@ -7,10 +7,13 @@ requires-python = ">=3.13"
 dependencies = [
     "asyncpg>=0.30.0",
     "fastapi>=0.116.1",
-    "pydantic>=2.11.7",
+    "pre-commit>=4.2.0",
+    "pydantic[mypy]>=2.11.7",
     "pydantic-settings>=2.10.1",
     "pytest>=8.4.1",
     "sqlalchemy>=2.0.42",
+    "pytest-asyncio>=1.1.0",
+    "aiosqlite>=0.21.0",
 ]
 
 [project.optional-dependencies]
@@ -71,6 +74,7 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 "__init__.py" = ["F401", "F403"]
 "tests/*" = ["T20", "S101"]
 "main.py" = ["T201"]
+"*/api/routers/*.py" = ["B008"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["to_the_hell", "oncallhub"]
@@ -79,7 +83,7 @@ known-first-party = ["to_the_hell", "oncallhub"]
 docstring-quotes = "double"
 
 [tool.mypy]
-python_version = "3.13"  
+python_version = "3.13"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
@@ -92,6 +96,7 @@ warn_unused_ignores = true
 warn_no_return = true
 follow_imports = "normal"
 ignore_missing_imports = true
+plugins = []
 
 exclude = [
     ".venv",
@@ -108,5 +113,17 @@ ignore_errors = true
 module = [
     "pandas.*",
     "numpy.*",
+    "pydantic.*",
+    "pydantic_settings.*",
+    "fastapi.*",
+    "pytest.*",
+    "pytest_asyncio.*",
+    "sqlalchemy.*",
 ]
 ignore_missing_imports = true
+
+# Специфичные настройки для Pydantic
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true

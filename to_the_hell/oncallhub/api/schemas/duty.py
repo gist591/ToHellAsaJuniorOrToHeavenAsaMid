@@ -3,7 +3,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 
-class Duty(BaseModel):
+class DutySchema(BaseModel):  # type: ignore[misc]
     id: UUID
     user_id: UUID
     start_time: float
