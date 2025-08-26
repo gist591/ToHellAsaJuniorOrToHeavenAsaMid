@@ -1,3 +1,1247 @@
+
+
+========== .github/workflows/ci.yml ==========
+
+name: CI
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: DOCKER_IMAGE_NAME
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Docker image building
+        run: |
+          docker login -u ${{secrets.DOCKER_HUB_USER}} -p ${{secrets.DOCKER_HUB_PASSWORD}}
+          docker build -t ${{secrets.DOCKER_HUB_USER}}/${{vars.DOCKER_IMAGE_NAME}}:latest .
+          docker push ${{secrets.DOCKER_HUB_USER}}/${{vars.DOCKER_IMAGE_NAME}}:latest
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Test
+        run: uv run pytest
+
+
+========== .gitignore ==========
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py.cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+#   For a library or package, you might want to ignore these files since the code is
+#   intended to run in multiple environments; otherwise, check them in:
+# .python-version
+
+# pipenv
+#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
+#   However, in case of collaboration, if having platform-specific dependencies or dependencies
+#   having no cross-platform support, pipenv may install dependencies that don't work, or not
+#   install all needed dependencies.
+#Pipfile.lock
+
+# UV
+#   Similar to Pipfile.lock, it is generally recommended to include uv.lock in version control.
+#   This is especially recommended for binary packages to ensure reproducibility, and is more
+#   commonly ignored for libraries.
+#uv.lock
+
+# poetry
+#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
+#   This is especially recommended for binary packages to ensure reproducibility, and is more
+#   commonly ignored for libraries.
+#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
+#poetry.lock
+#poetry.toml
+
+# pdm
+#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
+#   pdm recommends including project-wide configuration in pdm.toml, but excluding .pdm-python.
+#   https://pdm-project.org/en/latest/usage/project/#working-with-version-control
+#pdm.lock
+#pdm.toml
+.pdm-python
+.pdm-build/
+
+# pixi
+#   Similar to Pipfile.lock, it is generally recommended to include pixi.lock in version control.
+#pixi.lock
+#   Pixi creates a virtual environment in the .pixi directory, just like venv module creates one
+#   in the .venv directory. It is recommended not to include this directory in version control.
+.pixi
+
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.envrc
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# PyCharm
+#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
+#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
+#  and can be added to the global gitignore or merged into this file.  For a more nuclear
+#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
+#.idea/
+
+# Abstra
+# Abstra is an AI-powered process automation framework.
+# Ignore directories containing user credentials, local state, and settings.
+# Learn more at https://abstra.io/docs
+.abstra/
+
+# Visual Studio Code
+#  Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore
+#  that can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
+#  and can be added to the global gitignore or merged into this file. However, if you prefer,
+#  you could uncomment the following to ignore the entire vscode folder
+# .vscode/
+
+# Ruff stuff:
+.ruff_cache/
+
+# PyPI configuration file
+.pypirc
+
+# Marimo
+marimo/_static/
+marimo/_lsp/
+__marimo__/
+
+# Streamlit
+.streamlit/secrets.toml
+
+
+========== .pre-commit-config.yaml ==========
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.11.2
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-requests, types-pyyaml]
+        args: [--strict, --ignore-missing-imports]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: debug-statements
+
+
+========== .python-version ==========
+
+3.13
+
+
+========== Dockerfile ==========
+
+FROM python:slim-trixie
+
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+
+ENV PATH="/root/.local/bin:${PATH}"
+
+WORKDIR /app
+COPY . /app
+
+RUN uv sync
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+
+========== README.md ==========
+
+
+
+========== config.py ==========
+
+
+
+========== docker-compose.yml ==========
+
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+
+========== main.py ==========
+
+
+
+========== manage.py ==========
+
+
+
+========== pyproject.toml ==========
+
+[project]
+name = "to_the_hell"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "asyncpg>=0.30.0",
+    "fastapi>=0.116.1",
+    "pre-commit>=4.2.0",
+    "pydantic[mypy]>=2.11.7",
+    "pydantic-settings>=2.10.1",
+    "pytest>=8.4.1",
+    "sqlalchemy>=2.0.42",
+    "pytest-asyncio>=1.1.0",
+    "aiosqlite>=0.21.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-cov",
+    "mypy>=1.17.1",
+    "pre-commit>=4.2.0",
+    "pytest-mypy-plugins>=3.2.0",
+    "ruff>=0.12.7",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["to_the_hell"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "DTZ",    # flake8-datetimez
+    "T10",    # flake8-debugger
+    "T20",    # flake8-print
+    "Q",      # flake8-quotes
+    "RET",    # flake8-return
+    "SIM",    # flake8-simplify
+    "PTH",    # flake8-use-pathlib
+    "ERA",    # flake8-eradicate
+    "PL",     # pylint
+    "RUF",    # ruff-specific
+]
+
+ignore = [
+    "E501",
+    "PLR0913",
+]
+
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401", "F403"]
+"tests/*" = ["T20", "S101"]
+"main.py" = ["T201"]
+"*/api/routers/*.py" = ["B008"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["to_the_hell", "oncallhub"]
+
+[tool.ruff.lint.flake8-quotes]
+docstring-quotes = "double"
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+follow_imports = "normal"
+ignore_missing_imports = true
+plugins = []
+
+exclude = [
+    ".venv",
+    "venv",
+    "build",
+    "dist",
+]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = [
+    "pandas.*",
+    "numpy.*",
+    "pydantic.*",
+    "pydantic_settings.*",
+    "fastapi.*",
+    "pytest.*",
+    "pytest_asyncio.*",
+    "sqlalchemy.*",
+]
+ignore_missing_imports = true
+
+# Специфичные настройки для Pydantic
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+
+========== requirements.txt ==========
+
+# This file was autogenerated by uv via the following command:
+#    uv pip compile pyproject.toml -o requirements.txt
+annotated-types==0.7.0
+    # via pydantic
+anyio==4.10.0
+    # via starlette
+fastapi==0.116.1
+    # via tohellasajuniorortoheavenasamid (pyproject.toml)
+greenlet==3.2.3
+    # via sqlalchemy
+idna==3.10
+    # via anyio
+iniconfig==2.1.0
+    # via pytest
+packaging==25.0
+    # via pytest
+pluggy==1.6.0
+    # via pytest
+pydantic==2.11.7
+    # via
+    #   tohellasajuniorortoheavenasamid (pyproject.toml)
+    #   fastapi
+pydantic-core==2.33.2
+    # via pydantic
+pygments==2.19.2
+    # via pytest
+pytest==8.4.1
+    # via tohellasajuniorortoheavenasamid (pyproject.toml)
+sniffio==1.3.1
+    # via anyio
+sqlalchemy==2.0.42
+    # via tohellasajuniorortoheavenasamid (pyproject.toml)
+starlette==0.47.2
+    # via fastapi
+typing-extensions==4.14.1
+    # via
+    #   fastapi
+    #   pydantic
+    #   pydantic-core
+    #   sqlalchemy
+    #   typing-inspection
+typing-inspection==0.4.1
+    # via pydantic
+
+
+========== tests/conftest.py ==========
+
+from collections.abc import AsyncIterator
+
+import pytest_asyncio
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+from to_the_hell.oncallhub.domain.entities import User
+from to_the_hell.oncallhub.domain.repositories import BaseUserRepository
+
+
+class FakeUserRepostitory(BaseUserRepository):
+    """
+    User repository for tests
+    """
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def create(self, user: User) -> User:
+        return user
+
+
+FAKE_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+
+async_engine = create_async_engine(url=FAKE_DATABASE_URL)
+async_session_factory = async_sessionmaker(async_engine, expire_on_commit=False)
+
+
+@pytest_asyncio.fixture  # type: ignore[misc]
+async def get_session() -> AsyncIterator[AsyncSession]:
+    async_engine = create_async_engine(url=FAKE_DATABASE_URL, echo=True)
+    async_session_factory = async_sessionmaker(async_engine, expire_on_commit=False)
+
+    async with async_session_factory() as session:
+        yield session
+
+    await async_engine.dispose()
+
+
+========== to_the_hell/__init__.py ==========
+
+
+
+========== to_the_hell/oncallhub/__init__.py ==========
+
+
+
+========== to_the_hell/oncallhub/api/__init__.py ==========
+
+
+
+========== to_the_hell/oncallhub/api/main.py ==========
+
+
+
+========== to_the_hell/oncallhub/api/routers/duties.py ==========
+
+from datetime import UTC, datetime
+from typing import Any
+from uuid import UUID
+
+from fastapi import APIRouter, Depends
+from fastapi.exceptions import HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from to_the_hell.oncallhub.api.schemas import DutySchema
+from to_the_hell.oncallhub.entitites import Duty
+from to_the_hell.oncallhub.infra.db import PostgresDutyRepository, get_session
+from to_the_hell.oncallhub.value_objects import DutyId, TimeRange, UserId
+
+router = APIRouter()
+
+
+@router.get("/current-duty/", response_model=DutySchema)  # type: ignore[misc]
+async def get_current_duty(session: AsyncSession = Depends(get_session)) -> Any:
+    """
+    Get current duty
+
+    Return:
+        404: current duty is not exist
+        200: current duty
+    """
+
+    repo = PostgresDutyRepository(session)
+    duty = await repo.get_current_duty()
+    if not duty:
+        raise HTTPException(status_code=404, detail="No current duty found")
+    return DutySchema(
+        id=UUID(str(duty.id)),
+        user_id=UUID(str(duty.user_id)),
+        start_time=duty.time_range.start.timestamp(),
+        end_time=duty.time_range.end.timestamp(),
+        status=duty.status,
+    )
+
+
+@router.post("/put-on-duty/", response_model=DutySchema)  # type: ignore[misc]
+async def create_duty(
+    duty_data: Duty, session: AsyncSession = Depends(get_session)
+) -> Duty:
+    """
+    Create new duty
+
+    TODO: Check that there are no overkaps,
+    user rights check,
+    validating time range
+    """
+
+    repo = PostgresDutyRepository(session)
+    duty = Duty(
+        id=DutyId.generate(),
+        user_id=UserId.from_string(str(duty_data.user_id)),
+        time_range=TimeRange(
+            start=datetime.fromtimestamp(duty_data.start_time, tz=UTC),
+            end=datetime.fromtimestamp(duty_data.end_time, tz=UTC),
+        ),
+        status=duty_data.status,
+    )
+
+    created_duty = await repo.create(duty)
+
+    return DutySchema(
+        id=UUID(str(created_duty.id)),
+        user_id=UserId.from_string(str(duty_data.user_id)),
+        time_range=TimeRange(
+            start_time=created_duty.time_range.start.timestamp(),
+            end_time=created_duty.time_range.end.timestamp(),
+        ),
+        status=duty_data.status,
+    )
+
+
+========== to_the_hell/oncallhub/api/routers/incidents.py ==========
+
+
+
+========== to_the_hell/oncallhub/api/routers/users.py ==========
+
+from fastapi import APIRouter
+
+router = APIRouter()
+
+
+========== to_the_hell/oncallhub/api/schemas/__init__.py ==========
+
+from .duty import DutySchema
+from .incident import IncidentSchema
+from .user import UserSchema
+
+__all__ = ["DutySchema", "IncidentSchema", "UserSchema"]
+
+
+========== to_the_hell/oncallhub/api/schemas/duty.py ==========
+
+from uuid import UUID
+
+from pydantic import BaseModel
+
+
+class DutySchema(BaseModel):  # type: ignore[misc]
+    id: UUID
+    user_id: UUID
+    start_time: float
+    end_time: float
+    status: bool
+
+
+========== to_the_hell/oncallhub/api/schemas/incident.py ==========
+
+from uuid import UUID
+
+from pydantic import BaseModel
+
+from .duty import DutySchema
+
+
+class IncidentSchema(BaseModel):  # type: ignore[misc]
+    id: UUID
+    description: str
+    created_at: float
+    status: bool
+    duty: DutySchema | None
+
+
+========== to_the_hell/oncallhub/api/schemas/user.py ==========
+
+from uuid import UUID
+
+from pydantic import BaseModel
+
+
+class UserSchema(BaseModel):  # type: ignore[misc]
+    id: UUID
+    name: str
+    telegram_username: str
+
+
+========== to_the_hell/oncallhub/core/__init__.py ==========
+
+
+
+========== to_the_hell/oncallhub/core/config.py ==========
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):  # type: ignore[misc]
+    """Настройки приложения"""
+
+    DATABASE_URL: str = "postgresql+asyncpg://user:pass@localhost/dbname"
+    DATABASE_URL_asyncpg: str = "postgresql+asyncpg://user:pass@localhost/dbname"
+    DATABASE_ECHO: bool = False
+
+    APP_NAME: str = "OnCall Hub"
+    DEBUG: bool = False
+    SECRET_KEY: str = "your-secret-key-change-in-production"
+
+    API_PREFIX: str = "/api/v1"
+
+    REDIS_URL: str | None = None
+
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="ignore"
+    )
+
+
+settings = Settings()
+
+
+========== to_the_hell/oncallhub/domain/__init__.py ==========
+
+
+
+========== to_the_hell/oncallhub/domain/entities/__init__.py ==========
+
+from .duty import Duty
+from .incident import Incident
+from .user import User
+
+__all__ = ["Duty", "Incident", "User"]
+
+
+========== to_the_hell/oncallhub/domain/entities/duty.py ==========
+
+from dataclasses import dataclass
+
+from to_the_hell.oncallhub.domain.value_objects import DutyId, TimeRange, UserId
+
+
+@dataclass
+class Duty:
+    id: DutyId
+    user_id: UserId
+    time_range: TimeRange
+    status: bool
+
+    def is_active(self) -> bool:
+        return self.status
+
+
+========== to_the_hell/oncallhub/domain/entities/incident.py ==========
+
+from dataclasses import dataclass
+
+from to_the_hell.oncallhub.domain.entities.duty import Duty
+from to_the_hell.oncallhub.domain.value_objects import IncidentId, Priority, TimeRange
+
+
+@dataclass
+class Incident:
+    """
+    Incident in system
+    """
+
+    id: IncidentId
+    description: str
+    time_range: TimeRange
+    status: bool
+    priority: Priority | None = None
+    assigned_duty: Duty | None = None
+
+    def is_active(self) -> bool:
+        """Incident is active?"""
+        return self.status
+
+    def close(self) -> None:
+        """Close incident"""
+        self.status = False
+
+    def escalate(self) -> None:
+        """
+        Escalation
+        """
+        if self.priority:
+            pass
+
+
+========== to_the_hell/oncallhub/domain/entities/user.py ==========
+
+from dataclasses import dataclass
+
+from to_the_hell.oncallhub.domain.value_objects import UserId
+
+
+@dataclass
+class User:
+    id: UserId
+    name: str
+    telegram_username: str
+
+
+========== to_the_hell/oncallhub/domain/repositories/__init__.py ==========
+
+from .base import BaseDutyRepository, BaseUserRepository
+
+__all__ = ["BaseDutyRepository", "BaseUserRepository"]
+
+
+========== to_the_hell/oncallhub/domain/repositories/base.py ==========
+
+from abc import ABC, abstractmethod
+
+from to_the_hell.oncallhub.domain.entities import Duty, User
+
+
+class BaseUserRepository(ABC):
+    """Abstract repository for User"""
+
+    @abstractmethod
+    async def create(self, user: User) -> User:
+        pass
+
+
+class BaseDutyRepository(ABC):
+    """Abstract repository for Duty"""
+
+    @abstractmethod
+    async def create(self, duty: Duty) -> Duty:
+        pass
+
+
+========== to_the_hell/oncallhub/domain/services/__init__.py ==========
+
+from .duty_service import assign_duty
+
+__all__ = [
+    "assign_duty",
+]
+
+
+========== to_the_hell/oncallhub/domain/services/duty_service.py ==========
+
+from to_the_hell.oncallhub.domain.entities import User
+from to_the_hell.oncallhub.domain.value_objects import TimeRange
+
+MIN_DUTY_HOURS = 1
+MAX_DUTY_HOURS = 24
+
+
+def assign_duty(user: User, time_range: TimeRange) -> str:
+    """
+    Assign duty to user
+
+    Args:
+        user: user for duty
+        time_range: time range of duty
+
+    Returns:
+
+    """
+    return f"Duty assigned on {time_range} from user {user.name}"
+
+
+def validate_duty_assignment(user: User, time_range: TimeRange) -> bool:
+    """
+    Valisate duty assigment
+    """
+    if time_range.duration_hours < MIN_DUTY_HOURS:
+        raise ValueError(f"Duty must be at least {MIN_DUTY_HOURS} hour long")
+
+    if time_range.duration_hours > MAX_DUTY_HOURS:
+        raise ValueError(f"Duty cannot exceed {MAX_DUTY_HOURS} hours")
+
+    return True
+
+
+========== to_the_hell/oncallhub/domain/services/incident_service.py ==========
+
+
+
+========== to_the_hell/oncallhub/domain/services/user_service.py ==========
+
+
+
+========== to_the_hell/oncallhub/domain/value_objects/__init__.py ==========
+
+from .ids import DutyId, IncidentId, UserId
+from .priority import Priority
+from .time_range import TimeRange
+
+__all__ = ["DutyId", "IncidentId", "Priority", "TimeRange", "UserId"]
+
+
+========== to_the_hell/oncallhub/domain/value_objects/ids.py ==========
+
+from dataclasses import dataclass
+from typing import TypeVar
+from uuid import UUID, uuid4
+
+T = TypeVar("T", bound="EntityId")
+
+
+@dataclass(frozen=True)
+class EntityId:
+    """Базовый класс для всех ID"""
+
+    value: UUID
+
+    @classmethod
+    def generate(cls: type[T]) -> T:
+        return cls(value=uuid4())
+
+    @classmethod
+    def from_string(cls: type[T], value: str) -> T:
+        return cls(value=UUID(value))
+
+    def __str__(self) -> str:
+        return str(self.value)
+
+
+class UserId(EntityId):
+    """ID пользователя"""
+
+    pass
+
+
+class IncidentId(EntityId):
+    """ID инцидента"""
+
+    pass
+
+
+class DutyId(EntityId):
+    """ID дежурства"""
+
+    pass
+
+
+========== to_the_hell/oncallhub/domain/value_objects/priority.py ==========
+
+from dataclasses import dataclass
+from enum import Enum
+
+
+class PriorityLevel(Enum):
+    """Уровни приоритета"""
+
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+
+@dataclass(frozen=True)
+class Priority:
+    level: PriorityLevel
+
+    @property
+    def multiplier(self) -> float:
+        """Вычисляемое свойство"""
+        return {
+            PriorityLevel.LOW: 1.0,
+            PriorityLevel.MEDIUM: 2.5,
+            PriorityLevel.HIGH: 5.0,
+            PriorityLevel.CRITICAL: 10.0,
+        }[self.level]
+
+    def __str__(self) -> str:
+        return self.level.value
+
+
+========== to_the_hell/oncallhub/domain/value_objects/time_range.py ==========
+
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Self
+
+
+@dataclass(frozen=True)
+class TimeRange:
+    start: datetime
+    end: datetime
+
+    def __post_init__(self) -> None:
+        if self.start >= self.end:
+            raise ValueError(f"Invalid time range: {self.start} >= {self.end}")
+
+    @classmethod
+    def from_start_end_hours(
+        cls, base_date: datetime,
+        start_hour: int,
+        end_from: int
+    ) -> Self:
+        """
+        Create TimeRange from hours, handling special cases
+        """
+        base = base_date.replace(hour=0, minute=0, second=0)
+        start = base + timedelta(hours=start_hour)
+
+    @property
+    def duration_hours(self) -> float:
+        return (self.end - self.start).total_seconds() / 3600
+
+    def contains(self, timestamp: datetime) -> bool:
+        return self.start <= timestamp <= self.end
+
+    def overlaps_with(self, other: "TimeRange") -> bool:
+        return not (self.end <= other.start or self.start >= other.end)
+
+    def __str__(self) -> str:
+        return f"{self.start.isoformat()} - {self.end.isoformat()}"
+
+
+========== to_the_hell/oncallhub/infra/db/__init__.py ==========
+
+from .models import DutyORM, IncidentORM, UserORM
+from .repositories import PostgresDutyRepository, PostgresUserRepository
+from .session import get_session
+
+__all__ = [
+    "DutyORM",
+    "IncidentORM",
+    "PostgresDutyRepository",
+    "PostgresUserRepository",
+    "UserORM",
+    "get_session",
+]
+
+
+========== to_the_hell/oncallhub/infra/db/models/__init__.py ==========
+
+from .duty import DutyORM
+from .incident import IncidentORM
+from .user import UserORM
+
+__all__ = [
+    "DutyORM",
+    "IncidentORM",
+    "UserORM",
+]
+
+
+========== to_the_hell/oncallhub/infra/db/models/base.py ==========
+
+from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr, mapped_column
+
+
+class Base(DeclarativeBase):  # type: ignore[misc]
+    pass
+
+
+class AbstractORM(Base):
+    """Base class for ORM models"""
+
+    id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
+
+    @classmethod
+    @declared_attr  # type: ignore[misc]
+    def __tablename__(cls) -> str:
+        return cls.__name__.lower()
+
+
+========== to_the_hell/oncallhub/infra/db/models/duty.py ==========
+
+from datetime import datetime
+
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
+
+from .base import AbstractORM
+from .user import UserORM
+
+
+class DutyORM(AbstractORM):
+    @classmethod
+    @declared_attr  # type: ignore[misc]
+    def __tablename__(cls) -> str:
+        return "duties"
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    start_time: Mapped[datetime] = mapped_column(nullable=False)
+    end_time: Mapped[datetime] = mapped_column()
+    status: Mapped[bool] = mapped_column(nullable=False)
+
+    user: Mapped[UserORM] = relationship(back_populates="duties")
+
+
+========== to_the_hell/oncallhub/infra/db/models/incident.py ==========
+
+from datetime import datetime
+
+from sqlalchemy.orm import Mapped, declared_attr, mapped_column
+
+from .base import AbstractORM
+
+
+class IncidentORM(AbstractORM):
+    @classmethod
+    @declared_attr  # type: ignore[misc]
+    def __tablename__(cls) -> str:
+        return "incidents"
+
+    description: Mapped[str] = mapped_column(nullable=False)
+    time_start_event: Mapped[datetime] = mapped_column(nullable=False)
+    time_end_event: Mapped[datetime | None] = mapped_column(nullable=True)
+    status: Mapped[bool] = mapped_column(nullable=False, default=True)
+
+
+========== to_the_hell/oncallhub/infra/db/models/user.py ==========
+
+from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
+
+from .base import AbstractORM
+from .duty import DutyORM
+
+
+class UserORM(AbstractORM):
+    @classmethod
+    @declared_attr  # type: ignore[misc]
+    def __tablename__(cls) -> str:
+        return "users"
+
+    name: Mapped[str] = mapped_column()
+    telegram_username: Mapped[str] = mapped_column(unique=True, nullable=False)
+
+    duties: Mapped[list[DutyORM]] = relationship(back_populates="user")
+
+
+========== to_the_hell/oncallhub/infra/db/repositories.py ==========
+
+from datetime import UTC, datetime
+
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from to_the_hell.oncallhub.domain.entities import Duty, User
+from to_the_hell.oncallhub.domain.repositories import (
+    BaseDutyRepository,
+    BaseUserRepository,
+)
+from to_the_hell.oncallhub.domain.value_objects import DutyId, TimeRange, UserId
+
+from . import DutyORM, UserORM
+
+
+class PostgresDutyRepository(BaseDutyRepository):
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def create(self, duty: Duty) -> Duty:
+        duty_orm = DutyORM()
+        duty_orm.user_id = int(str(duty.user_id))
+        duty_orm.start_time = duty.time_range.start
+        duty_orm.end_time = duty.time_range.end
+        duty_orm.status = duty.status
+
+        self.session.add(duty_orm)
+        await self.session.commit()
+        await self.session.refresh(duty_orm)
+        return Duty(
+            id=DutyId.from_string(str(duty_orm.id)),
+            user_id=UserId.from_string(str(duty_orm.user_id)),
+            time_range=TimeRange(duty_orm.start_time, duty_orm.end_time),
+            status=duty_orm.status,
+        )
+
+    async def get_current_duty(self) -> Duty | None:
+        stmt = select(DutyORM).where(
+            DutyORM.end_time >= datetime.now(UTC),
+            datetime.now(UTC) >= DutyORM.start_time,
+            DutyORM.status,
+        )
+        res = await self.session.execute(stmt)
+        duty_orm = res.scalar_one_or_none()
+
+        if not duty_orm:
+            return None
+
+        return Duty(
+            id=DutyId.from_string(str(duty_orm.id)),
+            user_id=UserId.from_string(str(duty_orm.user_id)),
+            time_range=TimeRange(duty_orm.start_time, duty_orm.end_time),
+            status=duty_orm.status,
+        )
+
+
+class PostgresUserRepository(BaseUserRepository):
+    """Repository for User on Postgres"""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def create(self, user: User) -> User:
+        user_orm = UserORM()
+        user_orm.name = user.name
+        user_orm.telegram_username = user.telegram_username
+
+        self.session.add(user_orm)
+        await self.session.commit()
+        await self.session.refresh(user_orm)
+        return User(
+            id=UserId.from_string(str(user_orm.id)),
+            name=user_orm.name,
+            telegram_username=user_orm.telegram_username,
+        )
+
+
+========== to_the_hell/oncallhub/infra/db/session.py ==========
+
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+from to_the_hell.oncallhub.core.config import settings
+
+async_engine = create_async_engine(url=settings.DATABASE_URL_asyncpg)
+
+async_session_factory = async_sessionmaker(async_engine, expire_on_commit=False)
+
+
+@asynccontextmanager
+async def get_session() -> AsyncIterator[AsyncSession]:
+    async with async_session_factory() as session:
+        yield session
+
+
+========== to_the_hell/oncallhub/services/__init__.py ==========
+
+
+
+========== to_the_hell/oncallhub/workers/__init__.py ==========
+
+
+
+========== uv.lock ==========
+
 version = 1
 revision = 3
 requires-python = ">=3.13"

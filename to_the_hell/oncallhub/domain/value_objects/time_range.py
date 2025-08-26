@@ -1,15 +1,12 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
+from typing import Self
 
 
 @dataclass(frozen=True)
 class TimeRange:
     start: datetime
     end: datetime
-
-    def __post_init__(self) -> None:
-        if self.start >= self.end:
-            raise ValueError(f"Invalid time range: {self.start} >= {self.end}")
 
     @property
     def duration_hours(self) -> float:
