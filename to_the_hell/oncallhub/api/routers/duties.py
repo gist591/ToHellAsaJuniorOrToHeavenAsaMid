@@ -7,9 +7,9 @@ from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from to_the_hell.oncallhub.api.schemas import DutySchema
-from to_the_hell.oncallhub.entitites import Duty
+from to_the_hell.oncallhub.domain.entities import Duty
 from to_the_hell.oncallhub.infra.db import PostgresDutyRepository, get_session
-from to_the_hell.oncallhub.value_objects import DutyId, TimeRange, UserId
+from to_the_hell.oncallhub.domain.value_objects import DutyId, TimeRange, UserId
 
 router = APIRouter()
 
@@ -28,11 +28,14 @@ async def get_current_duty(session: AsyncSession = Depends(get_session)) -> Any:
     duty = await repo.get_current_duty()
     if not duty:
         raise HTTPException(status_code=404, detail="No current duty found")
+
     return DutySchema(
         id=UUID(str(duty.id)),
         user_id=UUID(str(duty.user_id)),
-        start_time=duty.time_range.start.timestamp(),
-        end_time=duty.time_range.end.timestamp(),
+        TimeRange(
+            start=duty.time_range.start.timestamp(),
+            end=duty.time_range.end.timestamp(),
+        ),
         status=duty.status,
     )
 
@@ -66,8 +69,42 @@ async def create_duty(
         id=UUID(str(created_duty.id)),
         user_id=UserId.from_string(str(duty_data.user_id)),
         time_range=TimeRange(
-            start_time=created_duty.time_range.start.timestamp(),
-            end_time=created_duty.time_range.end.timestamp(),
+            start=created_duty.time_range.start.timestamp(),
+            end=created_duty.time_range.end.timestamp(),
         ),
         status=duty_data.status,
     )
+
+
+@router.get('/duties') # type: ignore[misc]
+def get_all_duties(
+    session: AsyncSession = Depends(get_session)
+) -> List[Duty]:
+    """
+    Get all duties in history
+
+    Return:
+        404: current duty is not exist
+        200: current duty
+    """
+
+    repo = PostgresDutyRepository(session)
+    duties = repo.get_all_duties()
+
+    if not duties:
+        raise HTTPException(status_code=404, detail="No duties found")
+
+    dutie_schemas = [
+        DutySchema(
+            id=UUID(str(duty.id)),
+            description=duty.description,
+            dutie_created_at=duty.dutie_created,
+            dutie_assigned_at=duty.duty.assigned,
+            status=duty.status,
+            priority=duty.priority,
+            assigned_duty=duty.assigned_duty
+
+        ) for duty in duties
+    ]
+
+    return dutie_schemas

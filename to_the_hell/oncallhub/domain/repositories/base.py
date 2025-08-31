@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
 
-from to_the_hell.oncallhub.domain.entities import Duty, User
+from to_the_hell.oncallhub.domain.entities import Devops, Duty, Incident
 
 
-class BaseUserRepository(ABC):
-    """Abstract repository for User"""
+class BaseDevopsRepository(ABC):
+    """Abstract repository for Devops"""
 
     @abstractmethod
-    async def create(self, user: User) -> User:
+    async def create(self, devops: Devops) -> Devops:
         pass
 
 
@@ -16,4 +16,12 @@ class BaseDutyRepository(ABC):
 
     @abstractmethod
     async def create(self, duty: Duty) -> Duty:
+        pass
+
+
+class BaseIncidentRepository(ABC):
+    """Abstract repository for Incident"""
+
+    @abstractmethod
+    async def create(self, incident: Incident) -> Incident:
         pass

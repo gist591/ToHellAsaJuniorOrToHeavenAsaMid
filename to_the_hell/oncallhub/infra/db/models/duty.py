@@ -4,7 +4,6 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
 
 from .base import AbstractORM
-from .user import UserORM
 
 
 class DutyORM(AbstractORM):
@@ -13,7 +12,7 @@ class DutyORM(AbstractORM):
     def __tablename__(cls) -> str:
         return "duties"
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("devopses.id"))
     start_time: Mapped[datetime] = mapped_column(nullable=False)
     end_time: Mapped[datetime] = mapped_column()
     status: Mapped[bool] = mapped_column(nullable=False)

@@ -1,3 +1,3 @@
-from .base import BaseDutyRepository, BaseUserRepository
+from .base import BaseDevopsRepository, BaseDutyRepository
 
-__all__ = ["BaseDutyRepository", "BaseUserRepository"]
+__all__ = ["BaseDevopsRepository", "BaseDutyRepository"]

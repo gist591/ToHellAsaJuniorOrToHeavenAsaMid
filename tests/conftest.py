@@ -1,22 +1,24 @@
+pytest_plugins = ["pytest_asyncio"]
+
 from collections.abc import AsyncIterator
 
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from to_the_hell.oncallhub.domain.entities import User
-from to_the_hell.oncallhub.domain.repositories import BaseUserRepository
+from to_the_hell.oncallhub.domain.entities import Devops
+from to_the_hell.oncallhub.domain.repositories import BaseDevopsRepository
 
 
-class FakeUserRepostitory(BaseUserRepository):
+class FakeDevopsRepostitory(BaseDevopsRepository):
     """
-    User repository for tests
+    Fake devops repository for tests
     """
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def create(self, user: User) -> User:
-        return user
+    async def create(self, devops: Devops) -> Devops:
+        return devops
 
 
 FAKE_DATABASE_URL = "sqlite+aiosqlite:///:memory:"

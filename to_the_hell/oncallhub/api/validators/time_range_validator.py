@@ -21,10 +21,10 @@ class TimeRangeValidator:
                 f'end hour must be between 0 and 23, got {end_hour}'
             )
 
-@classmethod
-def validate_duration(cls, time_range: TimeRange):
-    """Validate duration of duty in hours"""
-    if time_range.duration_hours > 12:
-        raise ValidationDurationError(
-            f''
-        )
+    @classmethod
+    def validate_duration(cls, time_range: TimeRange):
+        """Validate duration of duty in hours"""
+        if time_range.duration_hours > 12:
+            raise ValidationDurationError(
+                f''
+            )

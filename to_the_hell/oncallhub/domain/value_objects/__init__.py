@@ -1,5 +1,5 @@
-from .ids import DutyId, IncidentId, UserId
-from .priority import Priority
+from .ids import DevopsId, DutyId, IncidentId
+from .incident_priority import IncidentPriority
 from .time_range import TimeRange
 
-__all__ = ["DutyId", "IncidentId", "Priority", "TimeRange", "UserId"]
+__all__ = ["DevopsId", "DutyId", "IncidentId", "IncidentPriority", "TimeRange"]

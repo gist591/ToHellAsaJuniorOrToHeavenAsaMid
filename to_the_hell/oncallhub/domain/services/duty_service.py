@@ -1,25 +1,25 @@
-from to_the_hell.oncallhub.domain.entities import User
+from to_the_hell.oncallhub.domain.entities import Devops
 from to_the_hell.oncallhub.domain.value_objects import TimeRange
 
 MIN_DUTY_HOURS = 1
 MAX_DUTY_HOURS = 24
 
 
-def assign_duty(user: User, time_range: TimeRange) -> str:
+def assign_duty(devops: Devops, time_range: TimeRange) -> str:
     """
-    Assign duty to user
+    Assign duty to devops
 
     Args:
-        user: user for duty
+        devops: devops for duty
         time_range: time range of duty
 
     Returns:
 
     """
-    return f"Duty assigned on {time_range} from user {user.name}"
+    return f"Duty assigned on {time_range} from devops {devops.name}"
 
 
-def validate_duty_assignment(user: User, time_range: TimeRange) -> bool:
+def validate_duty_assignment(devops: Devops, time_range: TimeRange) -> bool:
     """
     Valisate duty assigment
     """

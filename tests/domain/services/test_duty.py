@@ -1,28 +1,37 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta
+from uuid import uuid4
 
 import pytest
 
-from to_the_hell.oncallhub.domain.entities import User
-from to_the_hell.oncallhub.domain.services import assign_duty
-from to_the_hell.oncallhub.domain.value_objects import TimeRange
+from to_the_hell.oncallhub.domain.entities import Devops, Duty
+from to_the_hell.oncallhub.domain.repositories import BaseDutyRepository
 
 
-@pytest.mark.parametrize(
-    ("user", "time_range"),
-    [
-        (
-            User(1, "Andrew"),
-            TimeRange(
-                datetime(2024, 1, 1, 10, 0, tzinfo=timezone.utc),
-                datetime(2024, 1, 1, 18, 0, tzinfo=timezone.utc)
-            )
-        ),
-    ]
+class FakeDutyRepository(BaseDutyRepository):
+    def __init__(self):
+        self.duties = []
 
-)
-def test_assign_duty(user: User, time_range: TimeRange):
-    asserted_answer = f"Duty assigned on {time_range} from user {user.name}"
+    async def create(self, duty: Duty) -> Duty:
+        duty.id = uuid4()
+        self.duties.append(duty)
+        return duty
 
-    result = assign_duty(user, time_range)
 
-    assert asserted_answer == result
+@pytest.mark.asyncio
+async def test_create_duty():
+    repo = FakeDutyRepository()
+
+    devops = Devops(name="Test Devops", email="test@example.com")
+
+    duty = Duty(
+        devops_id=devops.id or uuid4(),
+        start_time=datetime.now(),
+        end_time=datetime.now() + timedelta(hours=8),
+        status=True,
+    )
+
+    created_duty = await repo.create(duty)
+
+    assert created_duty.id is not None
+    assert created_duty.devops_id == duty.devops_id
+    assert created_duty.status is True

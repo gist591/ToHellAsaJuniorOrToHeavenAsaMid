@@ -8,6 +8,8 @@ from .duty import DutySchema
 class IncidentSchema(BaseModel):  # type: ignore[misc]
     id: UUID
     description: str
-    created_at: float
-    status: bool
-    duty: DutySchema | None
+    incident_created_at: float
+    status: str
+    incident_assigned_at: float
+    priority: int
+    assigned_duty: list[DutySchema] | None

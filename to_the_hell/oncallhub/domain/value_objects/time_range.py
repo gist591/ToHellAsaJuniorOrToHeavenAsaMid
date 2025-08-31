@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-from typing import Self
+from datetime import datetime
 
 
 @dataclass(frozen=True)

@@ -4,13 +4,13 @@ from .base import AbstractORM
 from .duty import DutyORM
 
 
-class UserORM(AbstractORM):
+class DevopsORM(AbstractORM):
     @classmethod
     @declared_attr  # type: ignore[misc]
     def __tablename__(cls) -> str:
-        return "users"
+        return "devopses"
 
     name: Mapped[str] = mapped_column()
     telegram_username: Mapped[str] = mapped_column(unique=True, nullable=False)
 
-    duties: Mapped[list[DutyORM]] = relationship(back_populates="user")
+    duties: Mapped[list[DutyORM]] = relationship(back_populates="devops")

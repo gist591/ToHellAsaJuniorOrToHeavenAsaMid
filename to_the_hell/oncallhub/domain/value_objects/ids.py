@@ -23,19 +23,19 @@ class EntityId:
         return str(self.value)
 
 
-class UserId(EntityId):
-    """ID пользователя"""
+class DevopsId(EntityId):
+    """ID of devops"""
 
     pass
 
 
 class IncidentId(EntityId):
-    """ID инцидента"""
+    """ID of incident"""
 
     pass
 
 
 class DutyId(EntityId):
-    """ID дежурства"""
+    """ID of duty"""
 
     pass

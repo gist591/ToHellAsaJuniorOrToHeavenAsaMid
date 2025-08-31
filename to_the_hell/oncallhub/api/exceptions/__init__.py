@@ -1,7 +1,3 @@
-from .validation_exceptions import ValidationError, ValidationDurationError
+from .validation_exceptions import ValidationDurationError, ValidationError
 
-
-__all__ = [
-    "ValidationError",
-    "ValidationDurationError"
-]
+__all__ = ["ValidationDurationError", "ValidationError"]

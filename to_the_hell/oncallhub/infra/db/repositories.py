@@ -3,14 +3,13 @@ from datetime import UTC, datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from to_the_hell.oncallhub.domain.entities import Duty, User
+from to_the_hell.oncallhub.domain.entities import Duty
 from to_the_hell.oncallhub.domain.repositories import (
     BaseDutyRepository,
-    BaseUserRepository,
 )
 from to_the_hell.oncallhub.domain.value_objects import DutyId, TimeRange, UserId
 
-from . import DutyORM, UserORM
+from . import DutyORM
 
 
 class PostgresDutyRepository(BaseDutyRepository):
@@ -54,22 +53,22 @@ class PostgresDutyRepository(BaseDutyRepository):
         )
 
 
-class PostgresUserRepository(BaseUserRepository):
-    """Repository for User on Postgres"""
+class PostgresDevopsRepository(BaseDevopsRepository):
+    """Repository for Devops on Postgres"""
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def create(self, user: User) -> User:
-        user_orm = UserORM()
-        user_orm.name = user.name
-        user_orm.telegram_username = user.telegram_username
+    async def create(self, devops: Devops) -> Devops:
+        user_orm = DevopsORM()
+        devops_orm.name = devops.name
+        devops_orm.telegram_username = devops.telegram_username
 
-        self.session.add(user_orm)
+        self.session.add(devops_orm)
         await self.session.commit()
-        await self.session.refresh(user_orm)
-        return User(
-            id=UserId.from_string(str(user_orm.id)),
-            name=user_orm.name,
-            telegram_username=user_orm.telegram_username,
+        await self.session.refresh(devops_orm)
+        return Devops(
+            id=DevopsId.from_string(str(devops_orm.id)),
+            name=devops_orm.name,
+            telegram_username=devops_orm.telegram_username,
         )
