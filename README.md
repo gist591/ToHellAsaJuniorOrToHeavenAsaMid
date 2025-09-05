@@ -1,3 +1,6 @@
+## On call система для автоматизации дежурств и отслеживания инцидентов с нотификацией 
+
+
 ## Лицензия
 
 Этот проект лицензирован под Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
