@@ -9,7 +9,7 @@ class IncidentORM(AbstractORM):
     def __tablename__(cls) -> str:
         return "incidents"
 
-    id: Mapped[id] = mapped_column(autoincrement=True, nullable=F)
+    id: Mapped[id] = mapped_column(autoincrement=True, nullable=False)
     description: Mapped[str] = mapped_column(nullable=False)
     incident_created: Mapped[float] = mapped_column(nullable=False)
     incident_assigned: Mapped[float | None] = mapped_column(nullable=True)

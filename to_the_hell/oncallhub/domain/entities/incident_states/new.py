@@ -1,5 +1,5 @@
-from datetime import datetime
-from typing import TYPE_CHECKING
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any
 
 from .base_state import IncidentState
 from .incident_status import IncidentStatus
@@ -16,18 +16,18 @@ class NewIncidentState(IncidentState):
         from .assigned import AssignedIncidentState
 
         incident.assigned_to = devops_id
-        incident.assigned_at = datetime.utcnow()
+        incident.assigned_at = datetime.now(tz=UTC)
         incident.set_state(AssignedIncidentState())
         return True
 
     def start_work(self, incident: "Incident") -> bool:
-        return False  # can't start work not-assigned incident
+        return False
 
-    def resolve(self, incident: "Incident") -> bool:
-        return False  # can't resolve not-assigned incident
+    def resolve(self, incident: "Incident", resolution: Any | None = None) -> bool:
+        return False
 
     def close(self, incident: "Incident") -> bool:
-        return False  # can't close not-assigned incident
+        return False
 
     def get_status(self) -> IncidentStatus:
         return IncidentStatus.NEW

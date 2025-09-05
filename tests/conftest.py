@@ -1,5 +1,3 @@
-pytest_plugins = ["pytest_asyncio"]
-
 from collections.abc import AsyncIterator
 
 import pytest_asyncio
@@ -7,6 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from to_the_hell.oncallhub.domain.entities import Devops
 from to_the_hell.oncallhub.domain.repositories import BaseDevopsRepository
+
+pytest_plugins = ["pytest_asyncio"]
 
 
 class FakeDevopsRepostitory(BaseDevopsRepository):

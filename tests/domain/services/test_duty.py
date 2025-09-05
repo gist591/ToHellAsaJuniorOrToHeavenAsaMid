@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 import pytest
@@ -8,25 +8,31 @@ from to_the_hell.oncallhub.domain.repositories import BaseDutyRepository
 
 
 class FakeDutyRepository(BaseDutyRepository):
-    def __init__(self):
-        self.duties = []
+    """Fake repository for testing"""
+
+    def __init__(self) -> None:
+        self.duties: list[Duty] = []
 
     async def create(self, duty: Duty) -> Duty:
+        """Create duty in memory"""
         duty.id = uuid4()
         self.duties.append(duty)
         return duty
 
 
-@pytest.mark.asyncio
-async def test_create_duty():
+@pytest.mark.asyncio  # type: ignore[misc]
+async def test_create_duty() -> None:
+    """Test duty creation through repository"""
     repo = FakeDutyRepository()
 
     devops = Devops(name="Test Devops", email="test@example.com")
+    duty_id = uuid4()
 
     duty = Duty(
+        id=duty_id,
         devops_id=devops.id or uuid4(),
-        start_time=datetime.now(),
-        end_time=datetime.now() + timedelta(hours=8),
+        start_time=datetime.now(tz=UTC),
+        end_time=datetime.now(tz=UTC) + timedelta(hours=8),
         status=True,
     )
 

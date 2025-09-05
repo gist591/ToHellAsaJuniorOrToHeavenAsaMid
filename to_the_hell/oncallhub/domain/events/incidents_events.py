@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any
 
 
 class IncidentStatus:
@@ -10,7 +11,7 @@ class IncidentStatus:
 
 @dataclass
 class IncidentCreated(IncidentStatus):
-    """Time of create incident"""
+    """Event for incident creation"""
 
     about_troubles: str
     date: datetime
@@ -21,13 +22,28 @@ class IncidentCreated(IncidentStatus):
 
 @dataclass
 class IncidentAssigned(IncidentStatus):
-    """Time of assigne incident"""
+    """Represents an incident assignment event"""
 
-    comment_of_user: str
-    date: datetime
+    assignee_comment: str
+    assigned_at: datetime
 
     def __str__(self) -> str:
-        return f"In {self.date} was solved incident, comment of user: {self.comment_of_user}"
+        """Human-readable representation"""
+        return f"Incident assigned at {self.assigned_at.isoformat()} | Comment: {self.assignee_comment}"
 
-    def to_str(self) -> float:
-        return float(self.date)  # TODO: make it
+    def to_timestamp(self) -> float:
+        """Convert to Unix timestamp"""
+        return self.assigned_at.timestamp()
+
+    def to_iso_string(self) -> str:
+        """Convert to ISO 8601 string"""
+        return self.assigned_at.isoformat()
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize to dictionary for API responses"""
+        return {
+            "event_type": "incident_assigned",
+            "assignee_comment": self.assignee_comment,
+            "assigned_at": self.assigned_at.isoformat(),
+            "timestamp": self.assigned_at.timestamp(),
+        }

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from .base_state import IncidentState
 from .incident_status import IncidentStatus
@@ -17,7 +17,7 @@ class ClosedIncidentState(IncidentState):
     def start_work(self, incident: "Incident") -> bool:
         return False
 
-    def resolve(self, incident: "Incident") -> bool:
+    def resolve(self, incident: "Incident", resolution: Any | None = None) -> bool:
         return False
 
     def close(self, incident: "Incident") -> bool:

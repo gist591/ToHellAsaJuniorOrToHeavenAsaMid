@@ -1,5 +1,5 @@
-from datetime import datetime
-from typing import TYPE_CHECKING
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any
 
 from .base_state import IncidentState
 from .incident_status import IncidentStatus
@@ -16,23 +16,23 @@ class InProgressIncidentState(IncidentState):
         from .assigned import AssignedIncidentState
 
         incident.assigned_to = devops_id
-        incident.assigned_at = datetime.utcnow()
+        incident.assigned_at = datetime.now(tz=UTC)
         incident.started_work_at = None
         incident.set_state(AssignedIncidentState())
-        return True  # can reassign the devops
+        return True
 
     def start_work(self, incident: "Incident") -> bool:
-        return False  # work yet started
+        return False
 
-    def resolve(self, incident: "Incident") -> bool:
+    def resolve(self, incident: "Incident", resolution: Any | None = None) -> bool:
         from .resolved import ResolvedIncidentState
 
-        incident.resolved_at = datetime.utcnow()
-        incident.set_state(ResolvedIncidentState)
+        incident.resolved_at = datetime.now(tz=UTC)
+        incident.set_state(ResolvedIncidentState())
         return True
 
     def close(self, incident: "Incident") -> bool:
-        return False  # need to start by resolving
+        return False
 
     def get_status(self) -> IncidentStatus:
-        return IncidentState.IN_PROGRESS
+        return IncidentStatus.IN_PROGRESS

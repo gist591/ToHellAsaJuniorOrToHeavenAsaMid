@@ -5,7 +5,7 @@ from to_the_hell.oncallhub.domain.value_objects.incident_priority import (
 )
 
 
-def test_incident_priority_values():
+def test_incident_priority_values() -> None:
     """Test incident priority enum values"""
     assert IncidentPriority.LOW.value == "low"
     assert IncidentPriority.MEDIUM.value == "medium"
@@ -13,7 +13,7 @@ def test_incident_priority_values():
     assert IncidentPriority.CRITICAL.value == "critical"
 
 
-def test_incident_priority_comparison():
+def test_incident_priority_comparison() -> None:
     """Test incident priority comparison"""
     assert IncidentPriority.LOW < IncidentPriority.MEDIUM
     assert IncidentPriority.MEDIUM < IncidentPriority.HIGH
@@ -24,7 +24,7 @@ def test_incident_priority_comparison():
     assert IncidentPriority.MEDIUM > IncidentPriority.LOW
 
 
-def test_incident_priority_from_string():
+def test_incident_priority_from_string() -> None:
     """Test creating priority from string"""
     assert IncidentPriority.from_string("low") == IncidentPriority.LOW
     assert IncidentPriority.from_string("MEDIUM") == IncidentPriority.MEDIUM
@@ -32,13 +32,13 @@ def test_incident_priority_from_string():
     assert IncidentPriority.from_string("CRITICAL") == IncidentPriority.CRITICAL
 
 
-def test_incident_priority_from_string_invalid():
+def test_incident_priority_from_string_invalid() -> None:
     """Test creating priority from invalid string"""
     with pytest.raises(ValueError, match="Invalid priority: invalid"):
         IncidentPriority.from_string("invalid")
 
 
-def test_incident_priority_string_representation():
+def test_incident_priority_string_representation() -> None:
     """Test priority string representation"""
     assert str(IncidentPriority.LOW) == "low"
     assert str(IncidentPriority.MEDIUM) == "medium"

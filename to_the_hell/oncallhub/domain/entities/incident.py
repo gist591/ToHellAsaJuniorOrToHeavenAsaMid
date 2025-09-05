@@ -1,13 +1,15 @@
-from datetime import datetime
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
 from to_the_hell.oncallhub.domain.value_objects import DevopsId, IncidentPriority
 
-from .incident_states import IncidentState, NewIncidentState
+if TYPE_CHECKING:
+    from .incident_states import IncidentState
 
 
 class Incident:
-    """Доменная сущность инцидента"""
+    """Domain entity for incident"""
 
     def __init__(
         self,
@@ -18,8 +20,11 @@ class Incident:
         self.title = title
         self.description = description
         self.priority = priority
-        self.created_at = datetime.utcnow()
-        self.status: IncidentState = NewIncidentState()
+        self.created_at = datetime.now(tz=UTC)
+
+        from .incident_states import NewIncidentState
+
+        self._state: IncidentState = NewIncidentState()
 
         self.id: UUID | None = None
         self.assigned_id: UUID | None = None
@@ -27,23 +32,54 @@ class Incident:
         self.updated_at: datetime | None = None
         self.comments: list[IncidentComment] = []
 
+        self.assigned_to: DevopsId | None = None
+        self.started_work_at: datetime | None = None
+        self.resolved_at: datetime | None = None
+        self.closed_at: datetime | None = None
+
+        self.incident_assigned: Any | None = None
+        self.assigned_duty: list[Any] | None = None
+
     def assign_to_devops(self, devops_id: DevopsId) -> None:
-        """Назначить инцидент пользователю"""
-        self.assigned_id = devops_id
-        self.assigned_at = datetime.utcnow()
-        self.updated_at = datetime.utcnow()
+        """Assign incident to devops user"""
+        self.assigned_id = devops_id.value
+        self.assigned_to = devops_id
+        self.assigned_at = datetime.now(tz=UTC)
+        self.updated_at = datetime.now(tz=UTC)
 
     def add_comment(self, text: str, user_id: UUID) -> None:
-        """Добавить комментарий к инциденту"""
+        """Add comment to incident"""
         comment = IncidentComment(
-            text=text, user_id=user_id, created_at=datetime.utcnow()
+            text=text, user_id=user_id, created_at=datetime.now(tz=UTC)
         )
         self.comments.append(comment)
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(tz=UTC)
+
+    def set_state(self, state: "IncidentState") -> None:
+        """Set new state for incident"""
+        self._state = state
+        self.updated_at = datetime.now(tz=UTC)
+
+    def get_state(self) -> "IncidentState":
+        """Get current state of incident"""
+        return self._state
+
+    def is_active(self) -> bool:
+        """Check if incident is active"""
+        from .incident_states import ClosedIncidentState, ResolvedIncidentState
+
+        return not isinstance(
+            self._state, (ClosedIncidentState | ResolvedIncidentState)
+        )
+
+    @property
+    def status(self) -> str:
+        """Get current status of incident"""
+        return self._state.get_status().value
 
 
 class IncidentComment:
-    """Комментарий к инциденту"""
+    """Comment for incident"""
 
     def __init__(self, text: str, user_id: UUID, created_at: datetime):
         self.text = text

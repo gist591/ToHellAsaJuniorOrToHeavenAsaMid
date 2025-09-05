@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 T = TypeVar("T")
 
@@ -56,12 +56,16 @@ class CommandHandler(ABC, Generic[T]):
 
 class CommandBus:
     def __init__(self) -> None:
-        self._handlers: dict[type, CommandHandler] = {}
+        self._handlers: dict[type[Command], CommandHandler[Any]] = {}
 
-    def register_handler(self, command_type: type, handler: CommandHandler) -> None:
+    def register_handler(
+        self,
+        command_type: type[Command],
+        handler: CommandHandler[Any],
+    ) -> None:
         self._handlers[command_type] = handler
 
-    async def execute(self, command: Command) -> CommandResult:
+    async def execute(self, command: Command) -> CommandResult[Any]:
         command_type = type(command)
 
         if command_type not in self._handlers:

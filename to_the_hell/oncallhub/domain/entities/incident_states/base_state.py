@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from to_the_hell.oncallhub.domain.value_objects import DevopsId
 
@@ -22,9 +22,10 @@ class IncidentState(ABC):
         pass
 
     @abstractmethod
-    def resolve(self, incident: "Incident", resolution) -> bool:
+    def resolve(self, incident: "Incident", resolution: Any = None) -> bool:
         pass
 
+    @abstractmethod
     def close(self, incident: "Incident") -> bool:
         pass
 

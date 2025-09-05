@@ -1,39 +1,48 @@
 from datetime import UTC, datetime
+from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from to_the_hell.oncallhub.domain.entities import Duty
+from to_the_hell.oncallhub.domain.entities import Devops, Duty, Incident
 from to_the_hell.oncallhub.domain.repositories import (
+    BaseDevopsRepository,
     BaseDutyRepository,
+    BaseIncidentRepository,
 )
-from to_the_hell.oncallhub.domain.value_objects import DutyId, TimeRange, UserId
 
-from . import DutyORM
+from .models import DevopsORM, DutyORM, IncidentORM
 
 
 class PostgresDutyRepository(BaseDutyRepository):
+    """Repository for duty operations in PostgreSQL"""
+
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
     async def create(self, duty: Duty) -> Duty:
+        """Create new duty in database"""
         duty_orm = DutyORM()
-        duty_orm.user_id = int(str(duty.user_id))
-        duty_orm.start_time = duty.time_range.start
-        duty_orm.end_time = duty.time_range.end
+        duty_orm.user_id = int(str(duty.devops_id))
+        duty_orm.start_time = duty.start_time
+        duty_orm.end_time = duty.end_time
         duty_orm.status = duty.status
 
         self.session.add(duty_orm)
         await self.session.commit()
         await self.session.refresh(duty_orm)
+
         return Duty(
-            id=DutyId.from_string(str(duty_orm.id)),
-            user_id=UserId.from_string(str(duty_orm.user_id)),
-            time_range=TimeRange(duty_orm.start_time, duty_orm.end_time),
+            id=duty_orm.id,
+            devops_id=duty_orm.user_id,
+            start_time=duty_orm.start_time,
+            end_time=duty_orm.end_time,
             status=duty_orm.status,
+            created_at=None,
         )
 
     async def get_current_duty(self) -> Duty | None:
+        """Get current active duty"""
         stmt = select(DutyORM).where(
             DutyORM.end_time >= datetime.now(UTC),
             datetime.now(UTC) >= DutyORM.start_time,
@@ -46,11 +55,31 @@ class PostgresDutyRepository(BaseDutyRepository):
             return None
 
         return Duty(
-            id=DutyId.from_string(str(duty_orm.id)),
-            user_id=UserId.from_string(str(duty_orm.user_id)),
-            time_range=TimeRange(duty_orm.start_time, duty_orm.end_time),
+            id=duty_orm.id,
+            devops_id=duty_orm.user_id,
+            start_time=duty_orm.start_time,
+            end_time=duty_orm.end_time,
             status=duty_orm.status,
+            created_at=None,
         )
+
+    async def get_all_duties(self) -> list[Duty]:
+        """Get all duties from database"""
+        stmt = select(DutyORM)
+        res = await self.session.execute(stmt)
+        duties_orm = res.scalars().all()
+
+        return [
+            Duty(
+                id=duty_orm.id,
+                devops_id=duty_orm.user_id,
+                start_time=duty_orm.start_time,
+                end_time=duty_orm.end_time,
+                status=duty_orm.status,
+                created_at=None,
+            )
+            for duty_orm in duties_orm
+        ]
 
 
 class PostgresDevopsRepository(BaseDevopsRepository):
@@ -60,15 +89,54 @@ class PostgresDevopsRepository(BaseDevopsRepository):
         self.session = session
 
     async def create(self, devops: Devops) -> Devops:
-        user_orm = DevopsORM()
+        """Create new devops in database"""
+        devops_orm = DevopsORM()
         devops_orm.name = devops.name
-        devops_orm.telegram_username = devops.telegram_username
+        devops_orm.telegram_username = devops.email
 
         self.session.add(devops_orm)
         await self.session.commit()
         await self.session.refresh(devops_orm)
+
         return Devops(
-            id=DevopsId.from_string(str(devops_orm.id)),
+            id=devops_orm.id,
             name=devops_orm.name,
-            telegram_username=devops_orm.telegram_username,
+            email=devops_orm.telegram_username,
+            phone=None,
+            created_at=None,
         )
+
+
+class PostgresIncidentRepository(BaseIncidentRepository):
+    """Repository for Incidents on Postgres"""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def create(self, incident: Incident) -> Incident:
+        """Create new incident in database"""
+        return incident
+
+    async def get_all_incidents(
+        self,
+        limit: int | None = None,
+        offset: int | None = None,
+        status: str | None = None,
+        assigned_to: UUID | None = None,
+    ) -> list[Incident]:
+        query = select(IncidentORM)
+
+        if status:
+            query = query.where(IncidentORM.status == status)
+        if assigned_to:
+            query = query.where(IncidentORM.assigned_duty == assigned_to)
+
+        if limit:
+            query = query.limit(limit)
+        if offset:
+            query = query.offset(offset)
+
+        result = await self.session.execute(query)
+        incidents_orm = result.scalars().all()
+
+        return [self._orm_to_entity(orm) for orm in incidents_orm]

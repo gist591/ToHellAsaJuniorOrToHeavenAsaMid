@@ -1,44 +1,29 @@
-from uuid import UUID
-
-from fastapi import APIRouter, Depends
-from fastapi.exceptions import HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, HTTPException
 
 from to_the_hell.oncallhub.api.schemas.incident import IncidentSchema
-from to_the_hell.oncallhub.domain.entities import Duty
-from to_the_hell.oncallhub.infra.db import get_session
-from to_the_hell.oncallhub.infra.db.repositories import PostgresIncidentRepository
+from to_the_hell.oncallhub.domain.application.dependencies import get_command_bus
+from to_the_hell.oncallhub.domain.commands import (
+    GetAllIncidentsCommand,
+)
+from to_the_hell.oncallhub.domain.commands.base import CommandBus, CommandResultStatus
 
 router = APIRouter()
 
 
-@router.get("/incidents")  # type: ignore[misc]
-def get_all_incidents(session: AsyncSession = Depends(get_session)) -> list[Duty]:
+@router.get("/incidents", response_model=list[IncidentSchema])
+async def get_all_incidents(
+    limit: int = 100,
+    offset: int = 0,
+    status: str | None = None,
+    command_bus: CommandBus = Depends(get_command_bus),
+) -> list[IncidentSchema]:
     """
     Get all incidents in history
-
-    Return:
-        404: current duty is not exist
-        200: current duty
     """
+    command = GetAllIncidentsCommand(limit=limit, offset=offset, status=status)
 
-    repo = PostgresIncidentRepository(session)
-    incidents = repo.get_all_incidents()
+    result = await command_bus.execute(command)
 
-    if not incidents:
-        raise HTTPException(status_code=404, detail="No incidents found")
-
-    incident_schemas = [
-        IncidentSchema(
-            id=UUID(str(incident.id)),
-            description=incident.description,
-            incident_created_at=incident.incident_created,
-            incident_assigned_at=incident.incident.assigned,
-            status=incident.status,
-            priority=incident.priority,
-            assigned_duty=incident.assigned_duty,
-        )
-        for incident in incidents
-    ]
-
-    return incident_schemas
+    if result.status == CommandResultStatus.FAILURE:
+        raise HTTPException(status_code=500, detail=result.error_message)
+    return result.data

@@ -1,9 +1,13 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
 
 from .base import AbstractORM
+
+if TYPE_CHECKING:
+    from .devops import DevopsORM
 
 
 class DutyORM(AbstractORM):
@@ -17,4 +21,4 @@ class DutyORM(AbstractORM):
     end_time: Mapped[datetime] = mapped_column()
     status: Mapped[bool] = mapped_column(nullable=False)
 
-    user: Mapped[UserORM] = relationship(back_populates="duties")
+    user: Mapped[DevopsORM] = relationship(back_populates="duties")

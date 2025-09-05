@@ -1,12 +1,17 @@
-from .models import DutyORM, IncidentORM, UserORM
-from .repositories import PostgresDutyRepository, PostgresUserRepository
+from .models import DevopsORM, DutyORM, IncidentORM
+from .repositories import (
+    PostgresDevopsRepository,
+    PostgresDutyRepository,
+    PostgresIncidentRepository,
+)
 from .session import get_session
 
 __all__ = [
+    "DevopsORM",
     "DutyORM",
     "IncidentORM",
+    "PostgresDevopsRepository",
     "PostgresDutyRepository",
-    "PostgresUserRepository",
-    "UserORM",
+    "PostgresIncidentRepository",
     "get_session",
 ]

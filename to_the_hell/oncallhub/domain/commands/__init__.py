@@ -1,3 +1,6 @@
+from duty_commands import CreateDutyCommand, GetAllDutiesCommand, GetCurrentDutyCommand
+from incident_commands import GetAllIncidentsCommand
+
 from .base import (
     Command,
     CommandBus,
@@ -12,4 +15,8 @@ __all__ = [
     "CommandHandler",
     "CommandResult",
     "CommandResultStatus",
+    "CreateDutyCommand",
+    "GetAllDutiesCommand",
+    "GetAllIncidentsCommand",
+    "GetCurrentDutyCommand",
 ]
