@@ -8,14 +8,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
       - name: Docker image building
         run: |
           docker login -u ${{secrets.DOCKER_HUB_USER}} -p ${{secrets.DOCKER_HUB_PASSWORD}}
           docker build -t ${{secrets.DOCKER_HUB_USER}}/${{vars.DOCKER_IMAGE_NAME}}:latest .
           docker push ${{secrets.DOCKER_HUB_USER}}/${{vars.DOCKER_IMAGE_NAME}}:latest
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v6
 
       - name: Install dependencies
         run: uv sync
