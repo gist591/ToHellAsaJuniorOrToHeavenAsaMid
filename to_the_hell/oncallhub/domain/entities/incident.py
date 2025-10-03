@@ -17,10 +17,10 @@ class Incident:
         description: str,
         priority: "IncidentPriority",
     ):
-        self.title = title
-        self.description = description
-        self.priority = priority
-        self.created_at = datetime.now(tz=UTC)
+        self.title: str = title
+        self.description: str = description
+        self.priority: IncidentPriority = priority
+        self.created_at: datetime = datetime.now(tz=UTC)
 
         from .incident_states import NewIncidentState
 

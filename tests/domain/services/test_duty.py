@@ -19,6 +19,14 @@ class FakeDutyRepository(BaseDutyRepository):
         self.duties.append(duty)
         return duty
 
+    async def get_current_duty(self) -> Duty | None:
+        """Get current duty - not implemented for tests"""
+        return None
+
+    async def get_all_duties(self) -> list[Duty]:
+        """Get all duties - not implemented for tests"""
+        return self.duties
+
 
 @pytest.mark.asyncio  # type: ignore[misc]
 async def test_create_duty() -> None:

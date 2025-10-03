@@ -6,7 +6,7 @@ from .duty import DutyORM
 
 class DevopsORM(AbstractORM):
     @classmethod
-    @declared_attr  # type: ignore[misc]
+    @declared_attr.directive
     def __tablename__(cls) -> str:
         return "devopses"
 

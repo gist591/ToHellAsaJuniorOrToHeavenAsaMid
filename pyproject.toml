@@ -15,6 +15,12 @@ dependencies = [
     "sqlalchemy>=2.0.42",
     "pytest-asyncio>=1.1.0",
     "aiosqlite>=0.21.0",
+    "python-multipart>=0.0.20",
+    "pyjwt[crypto]>=2.8.0",
+    "passlib[bcrypt]>=1.7.4",
+    "python-multipart>=0.0.9", # для form data
+    "alembic>=1.16.5",
+    "loguru>=0.7.3",
 ]
 
 [project.optional-dependencies]
@@ -75,6 +81,7 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 "__init__.py" = ["F401", "F403"]
 "tests/*" = ["T20", "S101"]
 "main.py" = ["T201"]
+"scripts/*" = ["T201"]
 "*/api/routers/*.py" = ["B008"]
 
 [tool.ruff.lint.isort]
@@ -96,19 +103,25 @@ warn_redundant_casts = true
 warn_unused_ignores = true
 warn_no_return = true
 follow_imports = "normal"
-ignore_missing_imports = true
-plugins = []
+ignore_missing_imports = false
+plugins = ["pydantic.mypy"]
 
 exclude = [
     ".venv",
     "venv",
     "build",
     "dist",
+    "alembic"
 ]
 
 [[tool.mypy.overrides]]
 module = "tests.*"
-ignore_errors = true
+disallow_untyped_defs = false
+disallow_untyped_decorators = false
+
+[[tool.mypy.overrides]]
+module = "scripts.*"
+disallow_untyped_defs = false
 
 [[tool.mypy.overrides]]
 module = [
@@ -120,11 +133,16 @@ module = [
     "pytest.*",
     "pytest_asyncio.*",
     "sqlalchemy.*",
+    "alembic.*"
 ]
 ignore_missing_imports = true
 
-# Специфичные настройки для Pydantic
+# Специфич: CommandBusные настройки для Pydantic
 [tool.pydantic-mypy]
 init_forbid_extra = true
 init_typed = true
 warn_required_dynamic_aliases = true
+
+[[tool.mypy.overrides]]
+module = 'pydantic'
+ignore_missing_imports = false

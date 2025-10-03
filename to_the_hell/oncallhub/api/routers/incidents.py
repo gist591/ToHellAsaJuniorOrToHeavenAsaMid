@@ -1,3 +1,5 @@
+from typing import cast
+
 from fastapi import APIRouter, Depends, HTTPException
 
 from to_the_hell.oncallhub.api.schemas.incident import IncidentSchema
@@ -26,4 +28,5 @@ async def get_all_incidents(
 
     if result.status == CommandResultStatus.FAILURE:
         raise HTTPException(status_code=500, detail=result.error_message)
-    return result.data
+
+    return cast(list[IncidentSchema], result.data) if result.data else []

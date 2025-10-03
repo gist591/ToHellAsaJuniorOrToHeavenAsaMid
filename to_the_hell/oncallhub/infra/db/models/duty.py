@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
+from uuid import UUID
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
@@ -12,11 +13,11 @@ if TYPE_CHECKING:
 
 class DutyORM(AbstractORM):
     @classmethod
-    @declared_attr  # type: ignore[misc]
+    @declared_attr.directive
     def __tablename__(cls) -> str:
         return "duties"
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("devopses.id"))
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("devopses.id"))
     start_time: Mapped[datetime] = mapped_column(nullable=False)
     end_time: Mapped[datetime] = mapped_column()
     status: Mapped[bool] = mapped_column(nullable=False)

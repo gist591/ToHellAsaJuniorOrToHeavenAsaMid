@@ -10,8 +10,7 @@ from to_the_hell.oncallhub.domain.repositories import (
     BaseDutyRepository,
     BaseIncidentRepository,
 )
-
-from .models import DevopsORM, DutyORM, IncidentORM
+from to_the_hell.oncallhub.infra.db.models import DevopsORM, DutyORM, IncidentORM
 
 
 class PostgresDutyRepository(BaseDutyRepository):
@@ -23,7 +22,7 @@ class PostgresDutyRepository(BaseDutyRepository):
     async def create(self, duty: Duty) -> Duty:
         """Create new duty in database"""
         duty_orm = DutyORM()
-        duty_orm.user_id = int(str(duty.devops_id))
+        duty_orm.user_id = duty.devops_id
         duty_orm.start_time = duty.start_time
         duty_orm.end_time = duty.end_time
         duty_orm.status = duty.status
@@ -34,7 +33,7 @@ class PostgresDutyRepository(BaseDutyRepository):
 
         return Duty(
             id=duty_orm.id,
-            devops_id=duty_orm.user_id,
+            devops_id=duty.devops_id,
             start_time=duty_orm.start_time,
             end_time=duty_orm.end_time,
             status=duty_orm.status,
@@ -140,3 +139,11 @@ class PostgresIncidentRepository(BaseIncidentRepository):
         incidents_orm = result.scalars().all()
 
         return [self._orm_to_entity(orm) for orm in incidents_orm]
+
+    def _orm_to_entity(self, orm: IncidentORM) -> Incident:
+        """Convert ORM model to domain entity"""
+        return Incident(
+            title="",
+            description=orm.description,
+            priority=orm.priority,
+        )
