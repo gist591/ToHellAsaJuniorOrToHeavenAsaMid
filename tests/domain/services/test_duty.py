@@ -1,3 +1,4 @@
+import uuid
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
@@ -33,7 +34,13 @@ async def test_create_duty() -> None:
     """Test duty creation through repository"""
     repo = FakeDutyRepository()
 
-    devops = Devops(name="Test Devops", email="test@example.com")
+    devops = Devops(
+        id=uuid.uuid4(),
+        name="Test Devops",
+        telegram_username="@hello",
+        email="test@example.com",
+        phone="8999999999",
+    )
     duty_id = uuid4()
 
     duty = Duty(
