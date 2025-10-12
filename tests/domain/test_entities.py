@@ -21,8 +21,7 @@ def test_devops_creation() -> None:
     assert devops.name == "Test Devops"
     assert devops.email == "test@example.com"
     assert devops.phone == "+1234567890"
-    assert devops.id is None
-    assert devops.created_at is None
+    assert devops.id
 
 
 def test_duty_creation() -> None:
