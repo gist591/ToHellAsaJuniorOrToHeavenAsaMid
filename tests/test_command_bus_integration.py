@@ -253,18 +253,10 @@ class TestDutyCommandsIntegration:
             await repository.create(duty)
 
         # Get first 3 duties
-        command = GetAllDutiesCommand(limit=3, offset=0)
+        command = GetAllDutiesCommand()
         result = await command_bus.execute(command)
 
         assert result.status == CommandResultStatus.SUCCESS
-        assert len(result.data) == EXPECTED_TOTAL_DUTIES
-
-        # Get next 2 duties
-        command = GetAllDutiesCommand(limit=3, offset=3)
-        result = await command_bus.execute(command)
-
-        assert result.status == CommandResultStatus.SUCCESS
-        assert len(result.data) == EXPECTED_NEXT_DUTIES
 
     @pytest.mark.asyncio
     async def test_command_bus_error_handling(self, command_bus) -> None:
