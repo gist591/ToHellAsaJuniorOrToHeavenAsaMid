@@ -1,3 +1,4 @@
+import uuid
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
@@ -9,7 +10,13 @@ from to_the_hell.oncallhub.domain.value_objects.incident_priority import (
 
 def test_devops_creation() -> None:
     """Test devops entity creation"""
-    devops = Devops(name="Test Devops", email="test@example.com", phone="+1234567890")
+    devops = Devops(
+        id=uuid.uuid4(),
+        name="Test Devops",
+        telegram_username="go",
+        email="test@example.com",
+        phone="1234567890",
+    )
 
     assert devops.name == "Test Devops"
     assert devops.email == "test@example.com"
@@ -44,6 +51,7 @@ def test_duty_creation() -> None:
 def test_incident_creation() -> None:
     """Test incident entity creation"""
     incident = Incident(
+        id=uuid.uuid4(),
         title="Test Incident",
         description="Test Description",
         priority=IncidentPriority.HIGH,
