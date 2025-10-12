@@ -1,6 +1,7 @@
-from uuid import UUID
+from datetime import datetime
+from typing import TYPE_CHECKING
 
-from sqlalchemy.orm import Mapped, declared_attr, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from to_the_hell.oncallhub.domain.value_objects.incident_priority import (
     IncidentPriority,
@@ -8,16 +9,27 @@ from to_the_hell.oncallhub.domain.value_objects.incident_priority import (
 
 from .base import AbstractORM
 
+if TYPE_CHECKING:
+    from .duty import DutyORM
+    from .incident_duty import IncidentDutyORM
+
 
 class IncidentORM(AbstractORM):
-    @classmethod
-    @declared_attr.directive
-    def __tablename__(cls) -> str:
-        return "incidents"
+    __tablename__ = "incidents"
 
+    title: Mapped[str] = mapped_column(nullable=False)
     description: Mapped[str] = mapped_column(nullable=False)
-    incident_created: Mapped[float] = mapped_column(nullable=False)
-    incident_assigned: Mapped[float | None] = mapped_column(nullable=True)
-    status: Mapped[str] = mapped_column(nullable=False, default=True)
-    priority: Mapped[IncidentPriority] = mapped_column(nullable=False, default=True)
-    assigned_duty: Mapped[list[UUID]] = mapped_column(nullable=True)
+    status: Mapped[str] = mapped_column(nullable=False, default="new")
+    priority: Mapped[IncidentPriority] = mapped_column(nullable=False)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    resolved_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    closed_at: Mapped[datetime | None] = mapped_column(nullable=True)
+
+    incident_duties: Mapped[list["IncidentDutyORM"]] = relationship(
+        back_populates="incident"
+    )
+
+    @property
+    def current_duties(self) -> list["DutyORM"]:
+        return [id_assoc.duty for id_assoc in self.incident_duties]

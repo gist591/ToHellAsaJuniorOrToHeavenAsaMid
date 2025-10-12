@@ -238,6 +238,8 @@ __marimo__/
 # private/public key
 .keys/
 
+workers
+
 
 ========== .pre-commit-config.yaml ==========
 
@@ -1479,67 +1481,129 @@ EXPECTED_SUCCESSFUL_COMMANDS = 5
 
 
 class FakeDutyRepository(BaseDutyRepository):
-    """In-memory implementation for testing"""
+    """In-memory repository for testing"""
 
-    def __init__(self) -> None:
-        self._duties: dict[UUID, Duty] = {}
-        self._counter = 0
+    def __init__(self):
+        self._storage: list[Duty] = []
 
     async def create(self, duty: Duty) -> Duty:
-        if duty.id is None:
-            duty.id = uuid4()
-        if duty.created_at is None:
-            duty.created_at = datetime.now(tz=UTC)
-        self._duties[duty.id] = duty
+        """Create duty"""
+        self._storage.append(duty)
         return duty
 
-    async def get_by_id(self, duty_id: UUID) -> Duty | None:
-        return self._duties.get(duty_id)
-
-    async def get_current_duty(self) -> Duty | None:
-        now = datetime.now(tz=UTC)
-        for duty in self._duties.values():
-            if duty.start_time <= now <= duty.end_time and duty.status:
+    async def get_by_id(self, duty_id: UUID) -> Optional[Duty]:
+        """get duty on ID"""
+        for duty in self._storage:
+            if duty.id == duty_id:
                 return duty
         return None
 
     async def get_all_duties(
-        self, limit: int | None = None, offset: int | None = None
+        self,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None
     ) -> list[Duty]:
-        duties = list(self._duties.values())
-
-        duties.sort(
-            key=lambda d: d.created_at or datetime.min.replace(tzinfo=UTC), reverse=True
+        """
+        Get all duties
+        """
+        sorted_duties = sorted(
+            self._storage,
+            key=lambda duty: duty.created_at,
+            reverse=True
         )
 
-        if offset:
-            duties = duties[offset:]
-        if limit:
-            duties = duties[:limit]
+        if offset is not None and offset > 0:
+            sorted_duties = sorted_duties[offset:]
 
-        return [self._duty_to_schema(duty) for duty in duties]
+        if limit is not None and limit > 0:
+            sorted_duties = sorted_duties[:limit]
 
-    async def check_overlapping(
-        self, start_time: datetime, end_time: datetime, exclude_id: UUID | None = None
-    ) -> bool:
-        for duty in self._duties.values():
-            if exclude_id and duty.id == exclude_id:
-                continue
-            if duty.status and not (
-                end_time <= duty.start_time or start_time >= duty.end_time
+        return sorted_duties
+
+    async def get_current_duty(self) -> Optional[Duty]:
+        """
+        Get current duty
+        """
+        current_time = datetime.now(tz=timezone.utc)
+
+        for duty in self._storage:
+            if (
+                duty.status
+                and duty.start_time <= current_time <= duty.end_time
             ):
-                return True
-        return False
+                return duty
 
-    def _duty_to_schema(self, duty: Duty) -> DutySchema:
-        return DutySchema(
-            id=duty.id,
-            devops_id=duty.devops_id,
-            start_time=duty.start_time,
-            end_time=duty.end_time,
-            status=duty.status,
-            created_at=duty.created_at,
+        return None
+
+    async def update(self, duty: Duty) -> Duty:
+        """Update duty"""
+        for index, stored_duty in enumerate(self._storage):
+            if stored_duty.id == duty.id:
+                self._storage[index] = duty
+                return duty
+        raise ValueError(f"Duty with id {duty.id} not found")
+
+    async def delete(self, duty_id: UUID) -> bool:
+        """Delete duty"""
+        initial_length = len(self._storage)
+        self._storage = [
+            duty for duty in self._storage
+            if duty.id != duty_id
+        ]
+        return len(self._storage) < initial_length
+
+    async def get_by_devops_id(
+        self,
+        devops_id: UUID,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None
+    ) -> list[Duty]:
+        """Get all duties to a specific devops by id"""
+        filtered_duties = sorted(
+            [duty for duty in self._storage if duty.devops_id == devops_id],
+            key=lambda duty: duty.created_at,
+            reverse=True
         )
+
+        if offset is not None and offset > 0:
+            filtered_duties = filtered_duties[offset:]
+
+        if limit is not None and limit > 0:
+            filtered_duties = filtered_duties[:limit]
+
+        return filtered_duties
+
+    async def get_active(
+        self,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None
+    ) -> list[Duty]:
+        """Get active duties"""
+        active_duties = sorted(
+            [duty for duty in self._storage if duty.status is True],
+            key=lambda duty: duty.created_at,
+            reverse=True
+        )
+
+        if offset is not None and offset > 0:
+            active_duties = active_duties[offset:]
+
+        if limit is not None and limit > 0:
+            active_duties = active_duties[:limit]
+
+        return active_duties
+
+    async def count(self) -> int:
+        """Calculate all duties"""
+        return len(self._storage)
+
+    async def clear(self) -> None:
+        """Clear storage"""
+        self._storage.clear()
+
+    async def exists(self, duty_id: UUID) -> bool:
+        """Check existing of duty"""
+        return any(duty.id == duty_id for duty in self._storage)
 
 
 class TestDutyCommandsIntegration:
@@ -1640,7 +1704,7 @@ class TestDutyCommandsIntegration:
 
     @pytest.mark.asyncio
     async def test_get_all_duties_with_pagination(
-        self, command_bus, repository
+        self, command_bus: CommandBus, repository
     ) -> None:
         """Test getting all duties with limit and offset"""
         # Create multiple duties
@@ -2170,6 +2234,10 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
+from to_the_hell.oncallhub.domain.value_objects.incident_priority import (
+    IncidentPriority,
+)
+
 from .duty import DutySchema
 
 
@@ -2178,8 +2246,8 @@ class IncidentSchema(BaseModel):
     description: str
     incident_created_at: float
     status: str
-    incident_assigned_at: float
-    priority: int
+    incident_assigned_at: float | None
+    priority: IncidentPriority
     assigned_duty: list[DutySchema] | None
 
 
@@ -2258,6 +2326,9 @@ class TimeRangeValidator:
 
 ========== to_the_hell/oncallhub/core/__init__.py ==========
 
+from .config import settings
+
+__all__ = ["settings"]
 
 
 ========== to_the_hell/oncallhub/core/config.py ==========
@@ -2265,8 +2336,12 @@ class TimeRangeValidator:
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Settings(BaseSettings):  # type: ignore[misc]
+class Settings(BaseSettings):
     """Настройки приложения"""
+
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="ignore"
+    )
 
     DATABASE_URL: str = "postgresql+asyncpg://user:pass@localhost/dbname"
     DATABASE_URL_asyncpg: str = "postgresql+asyncpg://user:pass@localhost/dbname"
@@ -2278,11 +2353,17 @@ class Settings(BaseSettings):  # type: ignore[misc]
 
     API_PREFIX: str = "/api/v1"
 
-    REDIS_URL: str | None = None
-
-    model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="ignore"
-    )
+    # ============ CELERY ============
+    CELERY_BROKER_URL: str = "redis://localhost:6379/0"
+    CELERY_RESULT_BACKEND: str = "redis://localhost:6379/0"
+    CELERY_TASK_SERIALIZER: str = "json"
+    CELERY_RESULT_SERIALIZER: str = "json"
+    CELERY_ACCEPT_CONTENT: list[str] = ["json"]
+    CELERY_TIMEZONE: str = "UTC"
+    CELERY_ENABLE_UTC: bool = True
+    CELERY_TASK_TRACK_STARTED: bool = True
+    CELERY_TASK_TIME_LIMIT: int = 30 * 60
+    CELERY_TASK_SOFT_TIME_LIMIT: int = 25 * 60
 
 
 settings = Settings()
@@ -2486,6 +2567,9 @@ from to_the_hell.oncallhub.domain.commands.incident_commands import (
     GetAllIncidentsCommand,
 )
 from to_the_hell.oncallhub.domain.repositories import BaseIncidentRepository
+from to_the_hell.oncallhub.domain.value_objects.incident_priority import (
+    IncidentPriority,
+)
 
 if TYPE_CHECKING:
     pass
@@ -2519,10 +2603,11 @@ class GetAllIncidentsHandler(CommandHandler[list[IncidentSchema]]):
                     if incident.assigned_at
                     else None,
                     status=incident.status,
-                    priority=incident.priority.value,
+                    priority=IncidentPriority(incident.priority.value),
                     assigned_duty=incident.assigned_duty,
                 )
                 for incident in incidents
+                if incident.id
             ]
 
             return CommandResult.success(incident_schemas)
@@ -2715,11 +2800,11 @@ from uuid import UUID
 
 @dataclass
 class Devops:
+    id: UUID
     name: str
     email: str
     phone: str | None = None
     created_at: datetime | None = None
-    id: UUID | None = None
 
 
 ========== to_the_hell/oncallhub/domain/entities/duty.py ==========
@@ -2788,10 +2873,10 @@ class Incident:
         description: str,
         priority: "IncidentPriority",
     ):
-        self.title = title
-        self.description = description
-        self.priority = priority
-        self.created_at = datetime.now(tz=UTC)
+        self.title: str = title
+        self.description: str = description
+        self.priority: IncidentPriority = priority
+        self.created_at: datetime = datetime.now(tz=UTC)
 
         from .incident_states import NewIncidentState
 
@@ -3708,6 +3793,8 @@ __all__ = [
 
 ========== to_the_hell/oncallhub/infra/db/models/base.py ==========
 
+from uuid import UUID
+
 from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr, mapped_column
 
 
@@ -3718,7 +3805,7 @@ class Base(DeclarativeBase):
 class AbstractORM(Base):
     """Base class for ORM models"""
 
-    id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
+    id: Mapped[UUID] = mapped_column(autoincrement=True, primary_key=True)
 
     @classmethod
     @declared_attr.directive
@@ -3750,6 +3837,7 @@ class DevopsORM(AbstractORM):
 
 from datetime import datetime
 from typing import TYPE_CHECKING
+from uuid import UUID
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
@@ -3766,7 +3854,7 @@ class DutyORM(AbstractORM):
     def __tablename__(cls) -> str:
         return "duties"
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("devopses.id"))
+    devops_id: Mapped[UUID] = mapped_column(ForeignKey("devopses.id"))
     start_time: Mapped[datetime] = mapped_column(nullable=False)
     end_time: Mapped[datetime] = mapped_column()
     status: Mapped[bool] = mapped_column(nullable=False)
@@ -3776,7 +3864,13 @@ class DutyORM(AbstractORM):
 
 ========== to_the_hell/oncallhub/infra/db/models/incident.py ==========
 
+from uuid import UUID
+
 from sqlalchemy.orm import Mapped, declared_attr, mapped_column
+
+from to_the_hell.oncallhub.domain.value_objects.incident_priority import (
+    IncidentPriority,
+)
 
 from .base import AbstractORM
 
@@ -3787,13 +3881,12 @@ class IncidentORM(AbstractORM):
     def __tablename__(cls) -> str:
         return "incidents"
 
-    id: Mapped[UUID] = mapped_column(autoincrement=True, nullable=False)
     description: Mapped[str] = mapped_column(nullable=False)
     incident_created: Mapped[float] = mapped_column(nullable=False)
     incident_assigned: Mapped[float | None] = mapped_column(nullable=True)
     status: Mapped[str] = mapped_column(nullable=False, default=True)
-    priority: Mapped[int] = mapped_column(nullable=False, default=True)
-    assigned_duty: Mapped[list] = mapped_column(nullable=True)
+    priority: Mapped[IncidentPriority] = mapped_column(nullable=False, default=True)
+    assigned_duty: Mapped[list[UUID]] = mapped_column(nullable=True)
 
 
 ========== to_the_hell/oncallhub/infra/db/repositories/__init__.py ==========
@@ -3837,7 +3930,7 @@ class PostgresDutyRepository(BaseDutyRepository):
     async def create(self, duty: Duty) -> Duty:
         """Create new duty in database"""
         duty_orm = DutyORM()
-        duty_orm.user_id = int(str(duty.devops_id))
+        duty_orm.user_id = duty.devops_id
         duty_orm.start_time = duty.start_time
         duty_orm.end_time = duty.end_time
         duty_orm.status = duty.status
@@ -4008,6 +4101,9 @@ async def get_session() -> AsyncIterator[AsyncSession]:
 
 ========== to_the_hell/oncallhub/workers/__init__.py ==========
 
+from .celery_app import celery_app
+
+__all__ = ["celery_app"]
 
 
 ========== uv.lock ==========

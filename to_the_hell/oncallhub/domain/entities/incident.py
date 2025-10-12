@@ -13,6 +13,7 @@ class Incident:
 
     def __init__(
         self,
+        id: UUID,
         title: str,
         description: str,
         priority: "IncidentPriority",
@@ -38,7 +39,7 @@ class Incident:
         self.closed_at: datetime | None = None
 
         self.incident_assigned: Any | None = None
-        self.assigned_duty: list[Any] | None = None
+        self.incident_duties: list[Any] | None = None
 
     def assign_to_devops(self, devops_id: DevopsId) -> None:
         """Assign incident to devops user"""

@@ -4,14 +4,6 @@ from uuid import UUID
 from to_the_hell.oncallhub.domain.entities import Devops, Duty, Incident
 
 
-class BaseDevopsRepository(ABC):
-    """Abstract repository for Devops"""
-
-    @abstractmethod
-    async def create(self, devops: Devops) -> Devops:
-        pass
-
-
 class BaseDutyRepository(ABC):
     """Abstract repository for Duty"""
 
@@ -25,6 +17,14 @@ class BaseDutyRepository(ABC):
 
     @abstractmethod
     async def get_all_duties(self) -> list[Duty]:
+        pass
+
+
+class BaseDevopsRepository(ABC):
+    """Abstract repository for Devops"""
+
+    @abstractmethod
+    async def create(self, devops: Devops) -> Devops:
         pass
 
 

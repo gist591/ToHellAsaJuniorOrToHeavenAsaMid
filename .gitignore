@@ -204,3 +204,5 @@ __marimo__/
 
 # private/public key
 .keys/
+
+workers

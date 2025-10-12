@@ -1,16 +1,19 @@
-from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
+from typing import TYPE_CHECKING
+
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import AbstractORM
-from .duty import DutyORM
+
+if TYPE_CHECKING:
+    from .duty import DutyORM
 
 
 class DevopsORM(AbstractORM):
-    @classmethod
-    @declared_attr.directive
-    def __tablename__(cls) -> str:
-        return "devopses"
+    __tablename__ = "devopses"
 
-    name: Mapped[str] = mapped_column()
+    name: Mapped[str] = mapped_column(nullable=False)
     telegram_username: Mapped[str] = mapped_column(unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(nullable=False)
+    phone: Mapped[str] = mapped_column(nullable=False)
 
-    duties: Mapped[list[DutyORM]] = relationship(back_populates="devops")
+    duties: Mapped[list["DutyORM"]] = relationship(back_populates="devops")

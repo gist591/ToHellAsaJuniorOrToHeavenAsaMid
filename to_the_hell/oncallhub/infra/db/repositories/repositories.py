@@ -3,6 +3,7 @@ from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from to_the_hell.oncallhub.domain.entities import Devops, Duty, Incident
 from to_the_hell.oncallhub.domain.repositories import (
@@ -10,7 +11,12 @@ from to_the_hell.oncallhub.domain.repositories import (
     BaseDutyRepository,
     BaseIncidentRepository,
 )
-from to_the_hell.oncallhub.infra.db.models import DevopsORM, DutyORM, IncidentORM
+from to_the_hell.oncallhub.infra.db.models import (
+    DevopsORM,
+    DutyORM,
+    IncidentDutyORM,
+    IncidentORM,
+)
 
 
 class PostgresDutyRepository(BaseDutyRepository):
@@ -22,7 +28,7 @@ class PostgresDutyRepository(BaseDutyRepository):
     async def create(self, duty: Duty) -> Duty:
         """Create new duty in database"""
         duty_orm = DutyORM()
-        duty_orm.user_id = duty.devops_id
+        duty_orm.devops_id = duty.devops_id
         duty_orm.start_time = duty.start_time
         duty_orm.end_time = duty.end_time
         duty_orm.status = duty.status
@@ -55,11 +61,10 @@ class PostgresDutyRepository(BaseDutyRepository):
 
         return Duty(
             id=duty_orm.id,
-            devops_id=duty_orm.user_id,
+            devops_id=duty_orm.devops_id,
             start_time=duty_orm.start_time,
             end_time=duty_orm.end_time,
             status=duty_orm.status,
-            created_at=None,
         )
 
     async def get_all_duties(self) -> list[Duty]:
@@ -71,11 +76,10 @@ class PostgresDutyRepository(BaseDutyRepository):
         return [
             Duty(
                 id=duty_orm.id,
-                devops_id=duty_orm.user_id,
+                devops_id=duty_orm.devops_id,
                 start_time=duty_orm.start_time,
                 end_time=duty_orm.end_time,
                 status=duty_orm.status,
-                created_at=None,
             )
             for duty_orm in duties_orm
         ]
@@ -91,7 +95,9 @@ class PostgresDevopsRepository(BaseDevopsRepository):
         """Create new devops in database"""
         devops_orm = DevopsORM()
         devops_orm.name = devops.name
-        devops_orm.telegram_username = devops.email
+        devops_orm.telegram_username = devops.telegram_username
+        devops_orm.email = devops.email
+        devops_orm.phone = devops.phone
 
         self.session.add(devops_orm)
         await self.session.commit()
@@ -100,9 +106,9 @@ class PostgresDevopsRepository(BaseDevopsRepository):
         return Devops(
             id=devops_orm.id,
             name=devops_orm.name,
-            email=devops_orm.telegram_username,
-            phone=None,
-            created_at=None,
+            telegram_username=devops_orm.telegram_username,
+            email=devops_orm.email,
+            phone=devops_orm.phone,
         )
 
 
@@ -114,7 +120,26 @@ class PostgresIncidentRepository(BaseIncidentRepository):
 
     async def create(self, incident: Incident) -> Incident:
         """Create new incident in database"""
-        return incident
+        incident_orm = IncidentORM()
+        incident_orm.title = incident.title
+        incident_orm.description = incident.description
+        incident_orm.status = incident.status
+        incident_orm.priority = incident.priority
+        incident_orm.created_at = incident.created_at
+        incident_orm.updated_at = incident.updated_at
+        incident_orm.resolved_at = incident.resolved_at
+        incident_orm.closed_at = incident.closed_at
+
+        self.session.add(incident_orm)
+        await self.session.commit()
+        await self.session.refresh(incident_orm)
+
+        return Incident(
+            id=incident_orm.id,
+            title=incident_orm.title,
+            description=incident_orm.description,
+            priority=incident_orm.priority,
+        )
 
     async def get_all_incidents(
         self,
@@ -128,7 +153,7 @@ class PostgresIncidentRepository(BaseIncidentRepository):
         if status:
             query = query.where(IncidentORM.status == status)
         if assigned_to:
-            query = query.where(IncidentORM.assigned_duty == assigned_to)
+            query = query.where(IncidentORM.incident_duties == assigned_to)
 
         if limit:
             query = query.limit(limit)
@@ -140,10 +165,39 @@ class PostgresIncidentRepository(BaseIncidentRepository):
 
         return [self._orm_to_entity(orm) for orm in incidents_orm]
 
-    def _orm_to_entity(self, orm: IncidentORM) -> Incident:
+    def _orm_to_entity(self, incident_orm: IncidentORM) -> Incident:
         """Convert ORM model to domain entity"""
         return Incident(
-            title="",
-            description=orm.description,
-            priority=orm.priority,
+            id=incident_orm.id,
+            title=incident_orm.title,
+            description=incident_orm.description,
+            priority=incident_orm.priority,
         )
+
+    async def assign_to_duty(
+        self, incident_id: UUID, duty_id: UUID, assigned_by: UUID | None = None
+    ) -> None:
+        """Assign incident on duty"""
+        from ..models.incident_duty import IncidentDutyORM
+
+        assignment = IncidentDutyORM(
+            incident_id=incident_id, duty_id=duty_id, assigned_by=assigned_by
+        )
+
+        self.session.add(assignment)
+        await self.session.commit()
+
+    async def get_incident_with_duties(self, incident_id: UUID) -> IncidentORM | None:
+        """Receive an incident with information about scheduled shifts"""
+        stmt = (
+            select(IncidentORM)
+            .options(
+                selectinload(IncidentORM.incident_duties).selectinload(
+                    IncidentDutyORM.duty
+                )
+            )
+            .where(IncidentORM.id == incident_id)
+        )
+
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()

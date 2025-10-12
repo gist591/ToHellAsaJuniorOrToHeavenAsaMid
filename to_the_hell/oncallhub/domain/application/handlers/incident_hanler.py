@@ -47,7 +47,7 @@ class GetAllIncidentsHandler(CommandHandler[list[IncidentSchema]]):
                     else None,
                     status=incident.status,
                     priority=IncidentPriority(incident.priority.value),
-                    assigned_duty=incident.assigned_duty,
+                    assigned_duty=incident.incident_duties,
                 )
                 for incident in incidents
                 if incident.id

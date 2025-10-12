@@ -5,7 +5,6 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from to_the_hell.oncallhub.api.schemas import DutySchema
 from to_the_hell.oncallhub.domain.application.handlers.duty_handlers import (
     CreateDutyHandler,
     GetAllDutiesHandler,
@@ -30,67 +29,114 @@ EXPECTED_SUCCESSFUL_COMMANDS = 5
 
 
 class FakeDutyRepository(BaseDutyRepository):
-    """In-memory implementation for testing"""
+    """In-memory repository for testing"""
 
-    def __init__(self) -> None:
-        self._duties: dict[UUID, Duty] = {}
-        self._counter = 0
+    def __init__(self):
+        self._storage: list[Duty] = []
 
     async def create(self, duty: Duty) -> Duty:
-        if duty.id is None:
-            duty.id = uuid4()
-        if duty.created_at is None:
-            duty.created_at = datetime.now(tz=UTC)
-        self._duties[duty.id] = duty
+        """Create duty"""
+        self._storage.append(duty)
         return duty
 
     async def get_by_id(self, duty_id: UUID) -> Duty | None:
-        return self._duties.get(duty_id)
-
-    async def get_current_duty(self) -> Duty | None:
-        now = datetime.now(tz=UTC)
-        for duty in self._duties.values():
-            if duty.start_time <= now <= duty.end_time and duty.status:
+        """get duty on ID"""
+        for duty in self._storage:
+            if duty.id == duty_id:
                 return duty
         return None
 
     async def get_all_duties(
         self, limit: int | None = None, offset: int | None = None
     ) -> list[Duty]:
-        duties = list(self._duties.values())
-
-        duties.sort(
-            key=lambda d: d.created_at or datetime.min.replace(tzinfo=UTC), reverse=True
+        """
+        Get all duties
+        """
+        sorted_duties = sorted(
+            self._storage, key=lambda duty: duty.created_at, reverse=True
         )
 
-        if offset:
-            duties = duties[offset:]
-        if limit:
-            duties = duties[:limit]
+        if offset is not None and offset > 0:
+            sorted_duties = sorted_duties[offset:]
 
-        return [self._duty_to_schema(duty) for duty in duties]
+        if limit is not None and limit > 0:
+            sorted_duties = sorted_duties[:limit]
 
-    async def check_overlapping(
-        self, start_time: datetime, end_time: datetime, exclude_id: UUID | None = None
-    ) -> bool:
-        for duty in self._duties.values():
-            if exclude_id and duty.id == exclude_id:
-                continue
-            if duty.status and not (
-                end_time <= duty.start_time or start_time >= duty.end_time
-            ):
-                return True
-        return False
+        return sorted_duties
 
-    def _duty_to_schema(self, duty: Duty) -> DutySchema:
-        return DutySchema(
-            id=duty.id,
-            devops_id=duty.devops_id,
-            start_time=duty.start_time,
-            end_time=duty.end_time,
-            status=duty.status,
-            created_at=duty.created_at,
+    async def get_current_duty(self) -> Duty | None:
+        """
+        Get current duty
+        """
+        current_time = datetime.now(tz=UTC)
+
+        for duty in self._storage:
+            if duty.status and duty.start_time <= current_time <= duty.end_time:
+                return duty
+
+        return None
+
+    async def update(self, duty: Duty) -> Duty:
+        """Update duty"""
+        for index, stored_duty in enumerate(self._storage):
+            if stored_duty.id == duty.id:
+                self._storage[index] = duty
+                return duty
+        raise ValueError(f"Duty with id {duty.id} not found")
+
+    async def delete(self, duty_id: UUID) -> bool:
+        """Delete duty"""
+        initial_length = len(self._storage)
+        self._storage = [duty for duty in self._storage if duty.id != duty_id]
+        return len(self._storage) < initial_length
+
+    async def get_by_devops_id(
+        self, devops_id: UUID, limit: int | None = None, offset: int | None = None
+    ) -> list[Duty]:
+        """Get all duties to a specific devops by id"""
+        filtered_duties = sorted(
+            [duty for duty in self._storage if duty.devops_id == devops_id],
+            key=lambda duty: duty.created_at,
+            reverse=True,
         )
+
+        if offset is not None and offset > 0:
+            filtered_duties = filtered_duties[offset:]
+
+        if limit is not None and limit > 0:
+            filtered_duties = filtered_duties[:limit]
+
+        return filtered_duties
+
+    async def get_active(
+        self, limit: int | None = None, offset: int | None = None
+    ) -> list[Duty]:
+        """Get active duties"""
+        active_duties = sorted(
+            [duty for duty in self._storage if duty.status is True],
+            key=lambda duty: duty.created_at,
+            reverse=True,
+        )
+
+        if offset is not None and offset > 0:
+            active_duties = active_duties[offset:]
+
+        if limit is not None and limit > 0:
+            active_duties = active_duties[:limit]
+
+        return active_duties
+
+    async def count(self) -> int:
+        """Calculate all duties"""
+        return len(self._storage)
+
+    async def clear(self) -> None:
+        """Clear storage"""
+        self._storage.clear()
+
+    async def exists(self, duty_id: UUID) -> bool:
+        """Check existing of duty"""
+        return any(duty.id == duty_id for duty in self._storage)
 
 
 class TestDutyCommandsIntegration:
@@ -191,7 +237,7 @@ class TestDutyCommandsIntegration:
 
     @pytest.mark.asyncio
     async def test_get_all_duties_with_pagination(
-        self, command_bus, repository
+        self, command_bus: CommandBus, repository
     ) -> None:
         """Test getting all duties with limit and offset"""
         # Create multiple duties
