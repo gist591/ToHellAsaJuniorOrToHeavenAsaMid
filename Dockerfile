@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml LICENSE ./
+COPY pyproject.toml LICENSE README.md ./
 
 RUN pip install uv
 RUN uv sync
