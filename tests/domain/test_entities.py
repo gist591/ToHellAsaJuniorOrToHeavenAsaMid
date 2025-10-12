@@ -19,6 +19,7 @@ def test_devops_creation() -> None:
     )
 
     assert devops.name == "Test Devops"
+    assert devops.telegram_username == "go"
     assert devops.email == "test@example.com"
     assert devops.phone == "+1234567890"
     assert devops.id
