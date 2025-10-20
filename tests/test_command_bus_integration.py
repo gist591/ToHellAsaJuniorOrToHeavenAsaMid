@@ -157,12 +157,13 @@ class TestDutyCommandsIntegration:
     @pytest.mark.asyncio
     async def test_create_duty_success(self, command_bus: CommandBus) -> None:
         """Test creating a duty with valid data"""
+        id = randint(0, 10000)
         devops_id = randint(0, 100000)
         start_time = datetime.now(tz=UTC) + timedelta(hours=1)
         end_time = start_time + timedelta(hours=8)
 
         command = CreateDutyCommand(
-            devops_id=devops_id, start_time=start_time, end_time=end_time
+            id=id, devops_id=devops_id, start_time=start_time, end_time=end_time
         )
 
         result = await command_bus.execute(command)
@@ -311,6 +312,7 @@ class TestDutyBusinessRules:
 
         async def create_duty(index: int) -> Any:
             command = CreateDutyCommand(
+                id=randint(0, 10000),
                 devops_id=randint(0, 100000),
                 start_time=datetime.now(tz=UTC) + timedelta(hours=index * 10),
                 end_time=datetime.now(tz=UTC) + timedelta(hours=(index + 1) * 10),
@@ -342,7 +344,8 @@ class TestCommandBusLifecycle:
 
         # Create duty with first handler
         command = CreateDutyCommand(
-            devops_id=randint(100000),
+            id=randint(0, 1000000),
+            devops_id=randint(0, 100000),
             start_time=datetime.now(tz=UTC),
             end_time=datetime.now(tz=UTC) + timedelta(hours=8),
         )
@@ -368,6 +371,7 @@ class TestCommandBusLifecycle:
         bus1.register_handler(CreateDutyCommand, CreateDutyHandler(repo))
 
         command = CreateDutyCommand(
+            id=randint(0, 1000000),
             devops_id=randint(0, 100000),
             start_time=datetime.now(tz=UTC),
             end_time=datetime.now(tz=UTC) + timedelta(hours=8),
