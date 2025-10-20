@@ -9,6 +9,8 @@ if TYPE_CHECKING:
 
 
 class DevopsORM(AbstractORM):
+    """DevOps user model"""
+
     __tablename__ = "devopses"
 
     name: Mapped[str] = mapped_column(nullable=False)

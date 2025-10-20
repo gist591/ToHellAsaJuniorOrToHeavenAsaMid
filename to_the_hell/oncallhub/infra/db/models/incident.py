@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 
 
 class IncidentORM(AbstractORM):
+    """Incident model"""
+
     __tablename__ = "incidents"
 
     title: Mapped[str] = mapped_column(nullable=False)

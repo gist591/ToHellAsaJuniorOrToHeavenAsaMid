@@ -20,7 +20,7 @@ from to_the_hell.oncallhub.infra.db.models import (
 
 
 class PostgresDutyRepository(BaseDutyRepository):
-    """Repository for duty operations in PostgreSQL"""
+    """PostgreSQL repository for Duty operations"""
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
@@ -67,6 +67,17 @@ class PostgresDutyRepository(BaseDutyRepository):
             status=duty_orm.status,
         )
 
+    def _orm_to_entity(self, orm: DutyORM) -> Duty:
+        """Convert ORM model to domain entity"""
+        return Duty(
+            id=orm.id,
+            devops_id=orm.devops_id,
+            start_time=orm.start_time,
+            end_time=orm.end_time,
+            status=orm.status,
+            created_at=orm.created_at,
+        )
+
     async def get_all_duties(self) -> list[Duty]:
         """Get all duties from database"""
         stmt = select(DutyORM)
@@ -86,7 +97,7 @@ class PostgresDutyRepository(BaseDutyRepository):
 
 
 class PostgresDevopsRepository(BaseDevopsRepository):
-    """Repository for Devops on Postgres"""
+    """PostgreSQL repository for DevOps users"""
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
@@ -148,6 +159,7 @@ class PostgresIncidentRepository(BaseIncidentRepository):
         status: str | None = None,
         assigned_to: UUID | None = None,
     ) -> list[Incident]:
+        """Get incidents with filtering"""
         query = select(IncidentORM)
 
         if status:

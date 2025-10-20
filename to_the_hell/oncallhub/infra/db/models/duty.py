@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 
 
 class DutyORM(AbstractORM):
+    """Duty schedule model"""
+
     __tablename__ = "duties"
 
     devops_id: Mapped[UUID] = mapped_column(ForeignKey("devopses.id"))
