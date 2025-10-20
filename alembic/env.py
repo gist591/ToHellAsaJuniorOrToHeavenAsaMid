@@ -8,7 +8,7 @@ from to_the_hell.oncallhub.infra.db.models.base import Base
 
 config = context.config
 
-database_url = settings.DATABASE_URL
+database_url = settings.get_database_url
 
 if database_url.startswith("postgresql+asyncpg://"):
     sync_database_url = database_url.replace("postgresql+asyncpg://", "postgresql://")

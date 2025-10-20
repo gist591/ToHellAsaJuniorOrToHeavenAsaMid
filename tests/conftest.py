@@ -21,15 +21,15 @@ class FakeDevopsRepostitory(BaseDevopsRepository):
         return devops
 
 
-FAKE_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+FAKE_get_database_url = "sqlite+aiosqlite:///:memory:"
 
-async_engine = create_async_engine(url=FAKE_DATABASE_URL)
+async_engine = create_async_engine(url=FAKE_get_database_url)
 async_session_factory = async_sessionmaker(async_engine, expire_on_commit=False)
 
 
 @pytest_asyncio.fixture  # type: ignore[misc]
 async def get_session() -> AsyncIterator[AsyncSession]:
-    async_engine = create_async_engine(url=FAKE_DATABASE_URL, echo=True)
+    async_engine = create_async_engine(url=FAKE_get_database_url, echo=True)
     async_session_factory = async_sessionmaker(async_engine, expire_on_commit=False)
 
     async with async_session_factory() as session:

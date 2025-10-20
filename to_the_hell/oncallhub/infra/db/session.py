@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import (
 from to_the_hell.oncallhub.core.config import settings
 from to_the_hell.oncallhub.infra.db.models.base import Base
 
-async_engine: AsyncEngine = create_async_engine(url=settings.DATABASE_URL)
+async_engine: AsyncEngine = create_async_engine(url=settings.get_database_url)
 async_session_factory = async_sessionmaker(async_engine, expire_on_commit=False)
 
 
