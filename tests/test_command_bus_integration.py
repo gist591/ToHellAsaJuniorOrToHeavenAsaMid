@@ -178,12 +178,13 @@ class TestDutyCommandsIntegration:
     @pytest.mark.asyncio
     async def test_create_duty_invalid_time_range(self, command_bus) -> None:
         """Test validation error when end_time is before start_time"""
+        id = randint(0, 10000)
         devops_id = randint(0, 100000)
         start_time = datetime.now(tz=UTC) + timedelta(hours=8)
         end_time = start_time - timedelta(hours=1)  # Invalid: end before start
 
         command = CreateDutyCommand(
-            devops_id=devops_id, start_time=start_time, end_time=end_time
+            id=id, devops_id=devops_id, start_time=start_time, end_time=end_time
         )
 
         result = await command_bus.execute(command)
@@ -290,6 +291,7 @@ class TestDutyBusinessRules:
         """Test duty duration constraints"""
         # Test minimum duration (if you have such rule)
         command = CreateDutyCommand(
+            id=randint(0, 100000),
             devops_id=randint(0, 1000000),
             start_time=datetime.now(tz=UTC),
             end_time=datetime.now(tz=UTC) + timedelta(minutes=30),  # Too short
