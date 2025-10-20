@@ -1,34 +1,38 @@
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
-from uuid import UUID
 
 from to_the_hell.oncallhub.domain.value_objects import DevopsId, IncidentPriority
 
 if TYPE_CHECKING:
-    from .incident_states import IncidentState
+    from to_the_hell.oncallhub.domain.entities.incident_states import IncidentState
 
 
 class Incident:
-    """Domain entity for incident"""
+    """
+    Domain entity for incident
+    """
 
     def __init__(
         self,
-        id: UUID,
+        id: int,
         title: str,
         description: str,
         priority: "IncidentPriority",
     ):
+        """Initialize incident entity"""
         self.title: str = title
         self.description: str = description
         self.priority: IncidentPriority = priority
         self.created_at: datetime = datetime.now(tz=UTC)
 
-        from .incident_states import NewIncidentState
+        from to_the_hell.oncallhub.domain.entities.incident_states import (
+            NewIncidentState,
+        )
 
         self._state: IncidentState = NewIncidentState()
 
-        self.id: UUID | None = None
-        self.assigned_id: UUID | None = None
+        self.id: int | None = None
+        self.assigned_id: int | None = None
         self.assigned_at: datetime | None = None
         self.updated_at: datetime | None = None
         self.comments: list[IncidentComment] = []
@@ -48,7 +52,7 @@ class Incident:
         self.assigned_at = datetime.now(tz=UTC)
         self.updated_at = datetime.now(tz=UTC)
 
-    def add_comment(self, text: str, user_id: UUID) -> None:
+    def add_comment(self, text: str, user_id: int) -> None:
         """Add comment to incident"""
         comment = IncidentComment(
             text=text, user_id=user_id, created_at=datetime.now(tz=UTC)
@@ -67,7 +71,10 @@ class Incident:
 
     def is_active(self) -> bool:
         """Check if incident is active"""
-        from .incident_states import ClosedIncidentState, ResolvedIncidentState
+        from to_the_hell.oncallhub.domain.entities.incident_states import (
+            ClosedIncidentState,
+            ResolvedIncidentState,
+        )
 
         return not isinstance(
             self._state, (ClosedIncidentState | ResolvedIncidentState)
@@ -80,9 +87,12 @@ class Incident:
 
 
 class IncidentComment:
-    """Comment for incident"""
+    """
+    Comment for incident
+    """
 
-    def __init__(self, text: str, user_id: UUID, created_at: datetime):
+    def __init__(self, text: str, user_id: int, created_at: datetime):
+        """Initialize comment with int user_id"""
         self.text = text
         self.user_id = user_id
         self.created_at = created_at

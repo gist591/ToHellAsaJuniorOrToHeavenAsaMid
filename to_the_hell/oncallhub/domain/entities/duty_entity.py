@@ -1,19 +1,20 @@
 from dataclasses import dataclass
 from datetime import datetime
-from uuid import UUID
 
 from to_the_hell.oncallhub.domain.value_objects import TimeRange
 
 
 @dataclass
 class Duty:
-    """Domain entity for duty"""
+    """
+    Domain entity for duty
+    """
 
-    devops_id: UUID
+    devops_id: int
     start_time: datetime
     end_time: datetime
     status: bool
-    id: UUID
+    id: int
     created_at: datetime | None = None
 
     @property
@@ -24,10 +25,10 @@ class Duty:
     @classmethod
     def create_from_time_range(
         cls,
-        devops_id: UUID,
+        devops_id: int,
         time_range: TimeRange,
         status: bool,
-        id: UUID,
+        id: int,
         created_at: datetime | None = None,
     ) -> "Duty":
         """Create duty from time range"""

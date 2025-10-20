@@ -1,11 +1,7 @@
-from .devops import DevopsORM
-from .duty import DutyORM
-from .incident import IncidentORM
-from .incident_duty import IncidentDutyORM
+from .base_orm import AbstractORM
+from .devops_orm import DevopsORM
+from .duty_orm import DutyORM
+from .incident_duty_orm import IncidentDutyORM
+from .incident_orm import IncidentORM
 
-__all__ = [
-    "DevopsORM",
-    "DutyORM",
-    "IncidentDutyORM",
-    "IncidentORM",
-]
+__all__ = ["AbstractORM", "DevopsORM", "DutyORM", "IncidentDutyORM", "IncidentORM"]

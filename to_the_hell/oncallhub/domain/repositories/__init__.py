@@ -1,3 +1,7 @@
-from .base import BaseDevopsRepository, BaseDutyRepository, BaseIncidentRepository
+from .base_repositories import (
+    BaseDevopsRepository,
+    BaseDutyRepository,
+    BaseIncidentRepository,
+)
 
 __all__ = ["BaseDevopsRepository", "BaseDutyRepository", "BaseIncidentRepository"]

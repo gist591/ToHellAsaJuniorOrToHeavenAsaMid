@@ -1,6 +1,4 @@
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
-from uuid import uuid4
 
 from to_the_hell.oncallhub.api.schemas import DutySchema
 from to_the_hell.oncallhub.domain.commands import (
@@ -15,9 +13,6 @@ from to_the_hell.oncallhub.domain.commands.duty_commands import (
 )
 from to_the_hell.oncallhub.domain.entities import Duty
 from to_the_hell.oncallhub.domain.repositories import BaseDutyRepository
-
-if TYPE_CHECKING:
-    pass
 
 
 class CreateDutyHandler(CommandHandler[DutySchema]):
@@ -35,7 +30,7 @@ class CreateDutyHandler(CommandHandler[DutySchema]):
 
         try:
             duty = Duty(
-                id=uuid4(),
+                id=command.id,
                 devops_id=command.devops_id,
                 start_time=command.start_time,
                 end_time=command.end_time,

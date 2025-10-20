@@ -1,5 +1,4 @@
 from datetime import UTC, datetime
-from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,9 +19,12 @@ from to_the_hell.oncallhub.infra.db.models import (
 
 
 class PostgresDutyRepository(BaseDutyRepository):
-    """PostgreSQL repository for Duty operations"""
+    """
+    PostgreSQL repository for Duty operations
+    """
 
     def __init__(self, session: AsyncSession) -> None:
+        """Initialize repository with async session"""
         self.session = session
 
     async def create(self, duty: Duty) -> Duty:
@@ -43,7 +45,7 @@ class PostgresDutyRepository(BaseDutyRepository):
             start_time=duty_orm.start_time,
             end_time=duty_orm.end_time,
             status=duty_orm.status,
-            created_at=None,
+            created_at=duty_orm.created_at,
         )
 
     async def get_current_duty(self) -> Duty | None:
@@ -59,13 +61,7 @@ class PostgresDutyRepository(BaseDutyRepository):
         if not duty_orm:
             return None
 
-        return Duty(
-            id=duty_orm.id,
-            devops_id=duty_orm.devops_id,
-            start_time=duty_orm.start_time,
-            end_time=duty_orm.end_time,
-            status=duty_orm.status,
-        )
+        return self._orm_to_entity(duty_orm)
 
     def _orm_to_entity(self, orm: DutyORM) -> Duty:
         """Convert ORM model to domain entity"""
@@ -84,22 +80,16 @@ class PostgresDutyRepository(BaseDutyRepository):
         res = await self.session.execute(stmt)
         duties_orm = res.scalars().all()
 
-        return [
-            Duty(
-                id=duty_orm.id,
-                devops_id=duty_orm.devops_id,
-                start_time=duty_orm.start_time,
-                end_time=duty_orm.end_time,
-                status=duty_orm.status,
-            )
-            for duty_orm in duties_orm
-        ]
+        return [self._orm_to_entity(duty_orm) for duty_orm in duties_orm]
 
 
 class PostgresDevopsRepository(BaseDevopsRepository):
-    """PostgreSQL repository for DevOps users"""
+    """
+    PostgreSQL repository for DevOps users
+    """
 
     def __init__(self, session: AsyncSession) -> None:
+        """Initialize repository with async session"""
         self.session = session
 
     async def create(self, devops: Devops) -> Devops:
@@ -124,9 +114,13 @@ class PostgresDevopsRepository(BaseDevopsRepository):
 
 
 class PostgresIncidentRepository(BaseIncidentRepository):
-    """Repository for Incidents on Postgres"""
+    """
+    Repository for Incidents on PostgreSQL
+    """
 
     def __init__(self, session: AsyncSession) -> None:
+        """Initialize repository with async session"""
+
         self.session = session
 
     async def create(self, incident: Incident) -> Incident:
@@ -157,9 +151,10 @@ class PostgresIncidentRepository(BaseIncidentRepository):
         limit: int | None = None,
         offset: int | None = None,
         status: str | None = None,
-        assigned_to: UUID | None = None,
+        assigned_to: int | None = None,
     ) -> list[Incident]:
         """Get incidents with filtering"""
+
         query = select(IncidentORM)
 
         if status:
@@ -179,6 +174,7 @@ class PostgresIncidentRepository(BaseIncidentRepository):
 
     def _orm_to_entity(self, incident_orm: IncidentORM) -> Incident:
         """Convert ORM model to domain entity"""
+
         return Incident(
             id=incident_orm.id,
             title=incident_orm.title,
@@ -187,11 +183,9 @@ class PostgresIncidentRepository(BaseIncidentRepository):
         )
 
     async def assign_to_duty(
-        self, incident_id: UUID, duty_id: UUID, assigned_by: UUID | None = None
+        self, incident_id: int, duty_id: int, assigned_by: int | None = None
     ) -> None:
-        """Assign incident on duty"""
-        from ..models.incident_duty import IncidentDutyORM
-
+        """Assign incident to duty"""
         assignment = IncidentDutyORM(
             incident_id=incident_id, duty_id=duty_id, assigned_by=assigned_by
         )
@@ -199,8 +193,8 @@ class PostgresIncidentRepository(BaseIncidentRepository):
         self.session.add(assignment)
         await self.session.commit()
 
-    async def get_incident_with_duties(self, incident_id: UUID) -> IncidentORM | None:
-        """Receive an incident with information about scheduled shifts"""
+    async def get_incident_with_duties(self, incident_id: int) -> IncidentORM | None:
+        """Get incident with all assigned duties"""
         stmt = (
             select(IncidentORM)
             .options(

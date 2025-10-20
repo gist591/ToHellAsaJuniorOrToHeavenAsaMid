@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from pydantic import BaseModel
 
 from to_the_hell.oncallhub.domain.value_objects.incident_priority import (
@@ -10,7 +8,7 @@ from .duty import DutySchema
 
 
 class IncidentSchema(BaseModel):
-    id: UUID
+    id: int
     description: str
     incident_created_at: float
     status: str

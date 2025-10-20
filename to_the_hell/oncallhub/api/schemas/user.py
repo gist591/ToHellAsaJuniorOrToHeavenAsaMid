@@ -1,10 +1,8 @@
-from uuid import UUID
-
 from pydantic import BaseModel
 
 
 class UserSchema(BaseModel):
-    id: UUID
+    id: int
     username: str
     email: str
     is_active: bool

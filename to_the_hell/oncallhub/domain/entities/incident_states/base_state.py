@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, Any
 from to_the_hell.oncallhub.domain.value_objects import DevopsId
 
 if TYPE_CHECKING:
-    from to_the_hell.oncallhub.domain.entities.incident import Incident
-    from to_the_hell.oncallhub.domain.entities.incident_states.incident_status import (
+    from to_the_hell.oncallhub.domain.entities import Incident
+    from to_the_hell.oncallhub.domain.entities.incident_states import (
         IncidentStatus,
     )
 

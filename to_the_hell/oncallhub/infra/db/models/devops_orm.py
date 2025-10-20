@@ -2,14 +2,16 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import AbstractORM
+from .base_orm import AbstractORM
 
 if TYPE_CHECKING:
-    from .duty import DutyORM
+    from .duty_orm import DutyORM
 
 
 class DevopsORM(AbstractORM):
-    """DevOps user model"""
+    """
+    DevOps user model
+    """
 
     __tablename__ = "devopses"
 

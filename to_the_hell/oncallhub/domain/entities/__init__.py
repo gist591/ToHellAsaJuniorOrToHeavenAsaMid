@@ -1,5 +1,6 @@
-from .devops import Devops
-from .duty import Duty
-from .incident import Incident
+from .devops_entity import Devops
+from .duty_entity import Duty
+from .incident_entity import Incident
+from .user_entity import User
 
-__all__ = ["Devops", "Duty", "Incident"]
+__all__ = ["Devops", "Duty", "Incident", "User"]

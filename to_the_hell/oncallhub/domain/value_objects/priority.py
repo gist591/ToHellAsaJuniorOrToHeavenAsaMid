@@ -3,7 +3,7 @@ from enum import Enum
 
 
 class PriorityLevel(Enum):
-    """Уровни приоритета"""
+    """Priority levels"""
 
     LOW = "low"
     MEDIUM = "medium"
@@ -17,7 +17,7 @@ class Priority:
 
     @property
     def multiplier(self) -> float:
-        """Вычисляемое свойство"""
+        """Calculating properties"""
         return {
             PriorityLevel.LOW: 1.0,
             PriorityLevel.MEDIUM: 2.5,

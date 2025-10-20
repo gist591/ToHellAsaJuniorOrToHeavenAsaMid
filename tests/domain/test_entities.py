@@ -1,5 +1,5 @@
-import uuid
 from datetime import UTC, datetime, timedelta
+from random import randint
 from uuid import uuid4
 
 from to_the_hell.oncallhub.domain.entities import Devops, Duty, Incident
@@ -11,7 +11,7 @@ from to_the_hell.oncallhub.domain.value_objects.incident_priority import (
 def test_devops_creation() -> None:
     """Test devops entity creation"""
     devops = Devops(
-        id=uuid.uuid4(),
+        id=randint(0, 100000),
         name="Test Devops",
         telegram_username="go",
         email="test@example.com",
@@ -33,8 +33,8 @@ def test_duty_creation() -> None:
     end_time = start_time + timedelta(hours=8)
 
     duty = Duty(
-        id=duty_id,
-        devops_id=devops_id,
+        id=randint(0, 100000),
+        devops_id=randint(0, 100000),
         start_time=start_time,
         end_time=end_time,
         status=True,
@@ -51,7 +51,7 @@ def test_duty_creation() -> None:
 def test_incident_creation() -> None:
     """Test incident entity creation"""
     incident = Incident(
-        id=uuid.uuid4(),
+        id=randint(0, 100000),
         title="Test Incident",
         description="Test Description",
         priority=IncidentPriority.HIGH,

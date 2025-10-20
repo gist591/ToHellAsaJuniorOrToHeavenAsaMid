@@ -1,30 +1,29 @@
 from dataclasses import dataclass
 from typing import TypeVar
-from uuid import UUID, uuid4
 
 T = TypeVar("T", bound="EntityId")
 
 
 @dataclass(frozen=True)
 class EntityId:
-    """Базовый класс для всех ID"""
+    """
+    Base class for all entity IDs
+    """
 
-    value: UUID
-
-    @classmethod
-    def generate(cls: type[T]) -> T:
-        return cls(value=uuid4())
+    value: int
 
     @classmethod
-    def from_string(cls: type[T], value: str) -> T:
-        return cls(value=UUID(value))
+    def from_int(cls: type[T], value: int) -> T:
+        """Create EntityId from integer value"""
+        return cls(value=value)
 
     def __str__(self) -> str:
+        """String representation of ID"""
         return str(self.value)
 
 
 class DevopsId(EntityId):
-    """ID of devops"""
+    """ID of devops user"""
 
     pass
 

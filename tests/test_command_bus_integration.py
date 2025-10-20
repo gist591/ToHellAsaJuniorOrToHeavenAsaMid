@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+from random import randint
 from typing import Any
-from uuid import UUID, uuid4
 
 import pytest
 
@@ -39,7 +39,7 @@ class FakeDutyRepository(BaseDutyRepository):
         self._storage.append(duty)
         return duty
 
-    async def get_by_id(self, duty_id: UUID) -> Duty | None:
+    async def get_by_id(self, duty_id: int) -> Duty | None:
         """get duty on ID"""
         for duty in self._storage:
             if duty.id == duty_id:
@@ -84,14 +84,14 @@ class FakeDutyRepository(BaseDutyRepository):
                 return duty
         raise ValueError(f"Duty with id {duty.id} not found")
 
-    async def delete(self, duty_id: UUID) -> bool:
+    async def delete(self, duty_id: int) -> bool:
         """Delete duty"""
         initial_length = len(self._storage)
         self._storage = [duty for duty in self._storage if duty.id != duty_id]
         return len(self._storage) < initial_length
 
     async def get_by_devops_id(
-        self, devops_id: UUID, limit: int | None = None, offset: int | None = None
+        self, devops_id: int, limit: int | None = None, offset: int | None = None
     ) -> list[Duty]:
         """Get all duties to a specific devops by id"""
         filtered_duties = sorted(
@@ -134,7 +134,7 @@ class FakeDutyRepository(BaseDutyRepository):
         """Clear storage"""
         self._storage.clear()
 
-    async def exists(self, duty_id: UUID) -> bool:
+    async def exists(self, duty_id: int) -> bool:
         """Check existing of duty"""
         return any(duty.id == duty_id for duty in self._storage)
 
@@ -157,7 +157,7 @@ class TestDutyCommandsIntegration:
     @pytest.mark.asyncio
     async def test_create_duty_success(self, command_bus: CommandBus) -> None:
         """Test creating a duty with valid data"""
-        devops_id = uuid4()
+        devops_id = randint(0, 100000)
         start_time = datetime.now(tz=UTC) + timedelta(hours=1)
         end_time = start_time + timedelta(hours=8)
 
@@ -177,7 +177,7 @@ class TestDutyCommandsIntegration:
     @pytest.mark.asyncio
     async def test_create_duty_invalid_time_range(self, command_bus) -> None:
         """Test validation error when end_time is before start_time"""
-        devops_id = uuid4()
+        devops_id = randint(0, 100000)
         start_time = datetime.now(tz=UTC) + timedelta(hours=8)
         end_time = start_time - timedelta(hours=1)  # Invalid: end before start
 
@@ -194,11 +194,10 @@ class TestDutyCommandsIntegration:
     @pytest.mark.asyncio
     async def test_get_current_duty_exists(self, command_bus, repository) -> None:
         """Test getting current active duty"""
-        # Create a duty that is currently active
-        devops_id = uuid4()
+        devops_id = randint(0, 1000000)
         now = datetime.now(tz=UTC)
         duty = Duty(
-            id=uuid4(),
+            id=randint(0, 100000),
             devops_id=devops_id,
             start_time=now - timedelta(hours=1),
             end_time=now + timedelta(hours=7),
@@ -220,8 +219,8 @@ class TestDutyCommandsIntegration:
         """Test when no current duty exists"""
         # Create an expired duty
         past_duty = Duty(
-            id=uuid4(),
-            devops_id=uuid4(),
+            id=randint(0, 100000),
+            devops_id=randint(0, 100000),
             start_time=datetime.now(tz=UTC) - timedelta(hours=10),
             end_time=datetime.now(tz=UTC) - timedelta(hours=2),
             status=True,
@@ -243,8 +242,8 @@ class TestDutyCommandsIntegration:
         # Create multiple duties
         for i in range(5):
             duty = Duty(
-                id=uuid4(),
-                devops_id=uuid4(),
+                id=randint(0, 100000),
+                devops_id=randint(0, 10000),
                 start_time=datetime.now(tz=UTC) + timedelta(hours=i * 8),
                 end_time=datetime.now(tz=UTC) + timedelta(hours=(i + 1) * 8),
                 status=True,
@@ -290,7 +289,7 @@ class TestDutyBusinessRules:
         """Test duty duration constraints"""
         # Test minimum duration (if you have such rule)
         command = CreateDutyCommand(
-            devops_id=uuid4(),
+            devops_id=randint(0, 1000000),
             start_time=datetime.now(tz=UTC),
             end_time=datetime.now(tz=UTC) + timedelta(minutes=30),  # Too short
         )
@@ -312,7 +311,7 @@ class TestDutyBusinessRules:
 
         async def create_duty(index: int) -> Any:
             command = CreateDutyCommand(
-                devops_id=uuid4(),
+                devops_id=randint(0, 100000),
                 start_time=datetime.now(tz=UTC) + timedelta(hours=index * 10),
                 end_time=datetime.now(tz=UTC) + timedelta(hours=(index + 1) * 10),
             )
@@ -343,7 +342,7 @@ class TestCommandBusLifecycle:
 
         # Create duty with first handler
         command = CreateDutyCommand(
-            devops_id=uuid4(),
+            devops_id=randint(100000),
             start_time=datetime.now(tz=UTC),
             end_time=datetime.now(tz=UTC) + timedelta(hours=8),
         )
@@ -369,7 +368,7 @@ class TestCommandBusLifecycle:
         bus1.register_handler(CreateDutyCommand, CreateDutyHandler(repo))
 
         command = CreateDutyCommand(
-            devops_id=uuid4(),
+            devops_id=randint(0, 100000),
             start_time=datetime.now(tz=UTC),
             end_time=datetime.now(tz=UTC) + timedelta(hours=8),
         )
