@@ -2,12 +2,9 @@ from typing import Any, cast
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from to_the_hell.oncallhub.api.deps import get_current_user
+from to_the_hell.oncallhub.api.deps import CommandBusDep, get_current_user
 from to_the_hell.oncallhub.api.schemas import DutySchema
-from to_the_hell.oncallhub.domain.application.dependencies import (
-    get_command_bus,
-)
-from to_the_hell.oncallhub.domain.commands import CommandBus, CommandResultStatus
+from to_the_hell.oncallhub.domain.commands import CommandResultStatus
 from to_the_hell.oncallhub.domain.commands.duty_commands import (
     CreateDutyCommand,
     GetAllDutiesCommand,
@@ -19,9 +16,10 @@ router = APIRouter()
 
 @router.get("/duties", response_model=list[DutySchema])
 async def get_all_duties(
-    command_bus: CommandBus = Depends(get_command_bus),
+    command_bus: CommandBusDep,
 ) -> list[DutySchema]:
     """Get all duties"""
+
     command = GetAllDutiesCommand()
     result = await command_bus.execute(command)
 
@@ -33,7 +31,7 @@ async def get_all_duties(
 
 @router.get("/current-duty/", response_model=DutySchema | None)
 async def get_current_duty(
-    command_bus: CommandBus = Depends(get_command_bus),
+    command_bus: CommandBusDep,
 ) -> DutySchema | None:
     """Get current duty"""
     command = GetCurrentDutyCommand()
@@ -48,11 +46,12 @@ async def get_current_duty(
 @router.post("/put-on-duty/", response_model=DutySchema)
 async def create_duty(
     duty_data: DutySchema,
-    command_bus: CommandBus = Depends(get_command_bus),
+    command_bus: CommandBusDep,
     current_user: dict[str, Any] = Depends(get_current_user),
 ) -> DutySchema:
     """Create new duty"""
     command = CreateDutyCommand(
+        id=duty_data.id,
         devops_id=duty_data.devops_id,
         start_time=duty_data.start_time,
         end_time=duty_data.end_time,

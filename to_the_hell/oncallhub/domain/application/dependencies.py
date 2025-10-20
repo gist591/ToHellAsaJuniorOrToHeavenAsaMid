@@ -1,8 +1,6 @@
-from functools import lru_cache
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from to_the_hell.oncallhub.application.handlers.duty_handlers import (
+from to_the_hell.oncallhub.domain.application.handlers import (
     CreateDutyHandler,
     GetAllDutiesHandler,
     GetCurrentDutyHandler,
@@ -13,12 +11,16 @@ from to_the_hell.oncallhub.domain.commands.duty_commands import (
     GetAllDutiesCommand,
     GetCurrentDutyCommand,
 )
-from to_the_hell.oncallhub.infra.db import PostgresDutyRepository
+from to_the_hell.oncallhub.infra.db.repositories import PostgresDutyRepository
 
 
-@lru_cache
-def get_command_bus(session: AsyncSession) -> CommandBus:
-    """Dependency for getting CommandBus"""
+async def get_command_bus(session: AsyncSession) -> CommandBus:
+    """
+    Create and configure Command Bus with all handlers
+    for get_commands_bus_dependency
+
+    Do not use this directly with FastAPI Depends()!
+    """
     command_bus = CommandBus()
 
     duty_repo = PostgresDutyRepository(session)
