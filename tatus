@@ -1,0 +1,95 @@
+[33mcommit df1b11b694910a0a067983f06a636c79025114fb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/test-ci[m[33m, [m[1;31morigin/feature/test-ci[m[33m)[m
+Author: gist591 <leonid24112006@yandex.ru>
+Date:   Fri Sep 5 07:41:25 2025 +0300
+
+    new branch
+
+[33mcommit def5547f5f65af27b3c4647191898eff61b958b3[m[33m ([m[1;31morigin/master[m[33m, [m[1;32mmaster[m[33m)[m
+Author: gist591 <leonid24112006@yandex.ru>
+Date:   Fri Sep 5 07:27:41 2025 +0300
+
+    Конфигурирование github workflow
+
+[33mcommit 9cc9602b225c85bbc84ccde106a0277e9c139e48[m
+Author: gist591 <leonid24112006@yandex.ru>
+Date:   Fri Sep 5 06:34:27 2025 +0300
+
+    Конфигурирование github workflow
+
+[33mcommit c783ef892eca450c41c6c733f0a2eaa117f3055d[m
+Author: gist591 <leonid24112006@yandex.ru>
+Date:   Fri Sep 5 06:19:33 2025 +0300
+
+    Критическая ошибка в github workflow
+
+[33mcommit 58fea841ce4aa4e90dfe9a114db825e863909dd4[m
+Author: gist591 <leonid24112006@yandex.ru>
+Date:   Fri Sep 5 06:12:24 2025 +0300
+
+    Переработаны команды для Uses Cases, обработчики команд теперь в domain/application, в routers теперь все работает через команды, борьба с mypy и добавление лицензии
+
+[33mcommit d0b6de1753c02cf15ffcae5be8aceeb07286108a[m
+Author: gist591 <leonid24112006@yandex.ru>
+Date:   Sun Aug 31 08:58:17 2025 +0300
+
+    Command Pattern для Use Cases (domain/commands), FastAPI endpoints v1: /incidents, /duties, тесты для use cases (commands), value_objects, entities и services)
+
+[33mcommit 7c727e9c98097ff7ef1cfaaf258c2e1f7b79ab34[m
+Author: Leonid Laktionov <lglaktionov@edu.hse.ru>
+Date:   Tue Aug 26 20:32:27 2025 +0300
+
+    Заготовки для валидации (api/validators/*) + исключения при валидации (api/exceptions/*)
+
+[33mcommit 505cac6fd5cd3411b02aab6abee0256f2e9274c8[m
+Author: gist591 <leonid24112006@yandex.ru>
+Date:   Sat Aug 23 03:50:50 2025 +0300
+
+    Добавлены Value objects в директории domain/value_objects: UserId, IncidentId, DutyId, Priority, TimeRange + небольшие правки опечаток и стилевых ошибок
+
+[33mcommit 1d5f30a8593f3e8646b21492f91007d8cbced2b5[m
+Author: gist59 <leonid24112006@yandex.ru>
+Date:   Sun Aug 17 06:32:56 2025 +0300
+
+    Незначительные правки опечаток
+
+[33mcommit 97daed0a23459b13404cad8124216366d28b5f34[m
+Author: gist59 <leonid24112006@yandex.ru>
+Date:   Sun Aug 17 05:52:24 2025 +0300
+
+    CI/CD: first Github Actions pipeline
+
+[33mcommit 83846d6220f99f6942305693d5966451d6138dee[m
+Author: Leonid Laktionov <lglaktionov@edu.hse.ru>
+Date:   Fri Jul 25 16:16:10 2025 +0300
+
+    Небольшые стилевые правки
+
+[33mcommit b7bddb71758c6d3f23941ceda7cde85c4366c29f[m
+Author: Leonid Laktionov <lglaktionov@edu.hse.ru>
+Date:   Fri Jul 25 02:54:56 2025 +0300
+
+    Небольшые стилевые правки
+
+[33mcommit c78d65f00488c041f12dbede7eea0293c112a914[m
+Author: Leonid Laktionov <lglaktionov@edu.hse.ru>
+Date:   Fri Jul 25 02:54:50 2025 +0300
+
+    Небольшые стилевые правки
+
+[33mcommit fe64b7be80dd423cec7d41769ee49641bdf6c40f[m
+Author: Leonid Laktionov <lglaktionov@edu.hse.ru>
+Date:   Thu Jul 24 05:26:43 2025 +0300
+
+    Небольшые стилевые правки
+
+[33mcommit 759f8528eadbdb9c759ad11e5e384cd4ab10ec38[m
+Author: Leonid Laktionov <lglaktionov@edu.hse.ru>
+Date:   Thu Jul 24 05:12:44 2025 +0300
+
+    Добавил UserRepository как Protocol, добавил PostgresUserRepository, переименовал DutyRepostiory в PostgresDutyRepository, Создал FakeUserRepository в фикстурах (НО НАРУШЕНИЕ DRY С КЛАССОМ PostgresUserRepository + чистка ранее не добавленных в .gitignore файлов
+
+[33mcommit 6735f6b3bdd950e2bb36689114f6ab751658260d[m
+Author: Leonid Laktionov <lglaktionov@edu.hse.ru>
+Date:   Thu Jul 24 01:52:57 2025 +0300
+
+    Реализованы модели User, Duty, Incident, Репозиторий для Duty, создана фабрика сессия на asyncpg, начало работы с assign_duty, на данный момент просто выводит f строку с нужным текстом без обращений к бд, чистая загрушка

@@ -1,5 +1,5 @@
 from datetime import UTC, datetime, timedelta
-from uuid import uuid4
+from random import randint
 
 from to_the_hell.oncallhub.domain.entities import Devops, Duty, Incident
 from to_the_hell.oncallhub.domain.value_objects.incident_priority import (
@@ -9,19 +9,25 @@ from to_the_hell.oncallhub.domain.value_objects.incident_priority import (
 
 def test_devops_creation() -> None:
     """Test devops entity creation"""
-    devops = Devops(name="Test Devops", email="test@example.com", phone="+1234567890")
+    devops = Devops(
+        id=randint(0, 100000),
+        name="Test Devops",
+        telegram_chat_id="12345135",
+        email="test@example.com",
+        phone="+1234567890",
+    )
 
     assert devops.name == "Test Devops"
+    assert devops.telegram_chat_id == "12345135"
     assert devops.email == "test@example.com"
     assert devops.phone == "+1234567890"
-    assert devops.id is None
-    assert devops.created_at is None
+    assert devops.id
 
 
 def test_duty_creation() -> None:
     """Test duty entity creation"""
-    devops_id = uuid4()
-    duty_id = uuid4()
+    devops_id = randint(0, 100000)
+    duty_id = randint(0, 100000)
     start_time = datetime.now(tz=UTC)
     end_time = start_time + timedelta(hours=8)
 
@@ -44,6 +50,7 @@ def test_duty_creation() -> None:
 def test_incident_creation() -> None:
     """Test incident entity creation"""
     incident = Incident(
+        id=randint(0, 100000),
         title="Test Incident",
         description="Test Description",
         priority=IncidentPriority.HIGH,

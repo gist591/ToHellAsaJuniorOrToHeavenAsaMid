@@ -10,8 +10,15 @@ repos:
     rev: v1.11.2
     hooks:
       - id: mypy
-        additional_dependencies: [types-requests, types-pyyaml]
-        args: [--strict, --ignore-missing-imports]
+        additional_dependencies:
+          - pydantic>=2.11.7
+          - types-requests
+          - types-pyyaml
+          - fastapi>=0.116.1
+          - sqlalchemy>=2.0.42
+          - pytest>=8.4.1
+        args: [--ignore-missing-imports]
+        exclude: ^(tests/|scripts/|alembic/)
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0

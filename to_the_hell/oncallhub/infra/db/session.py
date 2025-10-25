@@ -1,16 +1,23 @@
-from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
-
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from to_the_hell.oncallhub.core.config import settings
+from to_the_hell.oncallhub.infra.db.models.base_orm import Base
 
-async_engine = create_async_engine(url=settings.DATABASE_URL_asyncpg)
-
+async_engine: AsyncEngine = create_async_engine(url=settings.get_database_url)
 async_session_factory = async_sessionmaker(async_engine, expire_on_commit=False)
 
 
-@asynccontextmanager
-async def get_session() -> AsyncIterator[AsyncSession]:
-    async with async_session_factory() as session:
-        yield session
+async def init_db() -> None:
+    """Initialize database tables"""
+    async with async_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+
+async def drop_db() -> None:
+    """Drop all database tables"""
+    async with async_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)

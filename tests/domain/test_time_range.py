@@ -1,5 +1,4 @@
 from datetime import UTC, datetime
-from typing import Any, Type, Union
 
 import pytest
 
@@ -10,6 +9,7 @@ from to_the_hell.oncallhub.api.exceptions import (
 from to_the_hell.oncallhub.domain.value_objects import TimeRange
 
 
+@pytest.mark.asyncio  # type: ignore[misc]
 @pytest.mark.skip(reason="in that moment method is not exist")
 @pytest.mark.parametrize(
     ("start", "end", "expected_result"),
@@ -42,9 +42,7 @@ from to_the_hell.oncallhub.domain.value_objects import TimeRange
     ],
 )
 def test_time_range(
-    start: datetime,
-    end: datetime,
-    expected_result: Union[Type[Exception], str]
+    start: datetime, end: datetime, expected_result: type[Exception] | str
 ) -> None:
     """Test TimeRange validation"""
     if isinstance(expected_result, type) and issubclass(expected_result, Exception):

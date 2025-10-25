@@ -1,41 +1,57 @@
+from typing import Any, cast
+
 from fastapi import APIRouter, Depends, HTTPException
 
+from to_the_hell.oncallhub.api.deps import CommandBusDep, get_current_user
 from to_the_hell.oncallhub.api.schemas import DutySchema
-from to_the_hell.oncallhub.domain.application.dependencies import (
-    get_command_bus,
-)
-from to_the_hell.oncallhub.domain.commands import CommandBus, CommandResultStatus
+from to_the_hell.oncallhub.domain.commands import CommandResultStatus
 from to_the_hell.oncallhub.domain.commands.duty_commands import (
     CreateDutyCommand,
     GetAllDutiesCommand,
     GetCurrentDutyCommand,
 )
 
-
 router = APIRouter()
 
 
-@router.get("/current-duty/", response_model=DutySchema | None)  # type: ignore[misc]
+@router.get("/duties", response_model=list[DutySchema])
+async def get_all_duties(
+    command_bus: CommandBusDep,
+) -> list[DutySchema]:
+    """Get all duties"""
+
+    command = GetAllDutiesCommand()
+    result = await command_bus.execute(command)
+
+    if result.status == CommandResultStatus.FAILURE:
+        raise HTTPException(status_code=500, detail=result.error_message)
+
+    return cast(list[DutySchema], result.data) if result.data else []
+
+
+@router.get("/current-duty/", response_model=DutySchema | None)
 async def get_current_duty(
-    command_bus: CommandBus = Depends(get_command_bus),
-) -> DutySchema:
+    command_bus: CommandBusDep,
+) -> DutySchema | None:
+    """Get current duty"""
     command = GetCurrentDutyCommand()
     result = await command_bus.execute(command)
 
     if result.status == CommandResultStatus.FAILURE:
         raise HTTPException(status_code=500, detail=result.error_message)
 
-    if result.data is None:
-        raise HTTPException(status_code=404, detail="No current duty found")
-
-    return result.data
+    return cast(DutySchema, result.data) if result.data else None
 
 
-@router.post("/put-on-duty/", response_model=DutySchema)  # type: ignore[misc]
+@router.post("/put-on-duty/", response_model=DutySchema)
 async def create_duty(
-    duty_data: DutySchema, command_bus: CommandBus = Depends(get_command_bus)
+    duty_data: DutySchema,
+    command_bus: CommandBusDep,
+    current_user: dict[str, Any] = Depends(get_current_user),
 ) -> DutySchema:
+    """Create new duty"""
     command = CreateDutyCommand(
+        id=duty_data.id,
         devops_id=duty_data.devops_id,
         start_time=duty_data.start_time,
         end_time=duty_data.end_time,
@@ -49,14 +65,7 @@ async def create_duty(
     if result.status == CommandResultStatus.FAILURE:
         raise HTTPException(status_code=500, detail=result.error_message)
 
-    return result.data
+    if not result.data:
+        raise HTTPException(status_code=500, detail="Failed to create duty")
 
-
-@router.get("/duties", response_model=list[DutySchema])  # type: ignore[misc]
-async def get_all_duties(
-    command_bus: CommandBus = Depends(get_command_bus),
-) -> list[DutySchema]:
-    command = GetAllDutiesCommand()
-    result = await command_bus.execute(command)
-
-    return result.data
+    return cast(DutySchema, result.data)

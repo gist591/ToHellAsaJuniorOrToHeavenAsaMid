@@ -1,0 +1,4554 @@
+
+
+========== .github/workflows/ci.yml ==========
+
+name: CI
+
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: DOCKER_IMAGE_NAME
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Docker image building
+        run: |
+          docker login -u ${{secrets.DOCKER_HUB_USER}} -p ${{secrets.DOCKER_HUB_PASSWORD}}
+          docker build -t ${{secrets.DOCKER_HUB_USER}}/${{vars.DOCKER_IMAGE_NAME}}:latest .
+          docker push ${{secrets.DOCKER_HUB_USER}}/${{vars.DOCKER_IMAGE_NAME}}:latest
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Test
+        run: uv run pytest
+
+
+========== .gitignore ==========
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py.cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+#   For a library or package, you might want to ignore these files since the code is
+#   intended to run in multiple environments; otherwise, check them in:
+# .python-version
+
+# pipenv
+#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
+#   However, in case of collaboration, if having platform-specific dependencies or dependencies
+#   having no cross-platform support, pipenv may install dependencies that don't work, or not
+#   install all needed dependencies.
+#Pipfile.lock
+
+# UV
+#   Similar to Pipfile.lock, it is generally recommended to include uv.lock in version control.
+#   This is especially recommended for binary packages to ensure reproducibility, and is more
+#   commonly ignored for libraries.
+uv.lock
+
+# poetry
+#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
+#   This is especially recommended for binary packages to ensure reproducibility, and is more
+#   commonly ignored for libraries.
+#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
+#poetry.lock
+#poetry.toml
+
+# pdm
+#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
+#   pdm recommends including project-wide configuration in pdm.toml, but excluding .pdm-python.
+#   https://pdm-project.org/en/latest/usage/project/#working-with-version-control
+#pdm.lock
+#pdm.toml
+.pdm-python
+.pdm-build/
+
+# pixi
+#   Similar to Pipfile.lock, it is generally recommended to include pixi.lock in version control.
+#pixi.lock
+#   Pixi creates a virtual environment in the .pixi directory, just like venv module creates one
+#   in the .venv directory. It is recommended not to include this directory in version control.
+.pixi
+
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.envrc
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# PyCharm
+#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
+#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
+#  and can be added to the global gitignore or merged into this file.  For a more nuclear
+#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
+#.idea/
+
+# Abstra
+# Abstra is an AI-powered process automation framework.
+# Ignore directories containing user credentials, local state, and settings.
+# Learn more at https://abstra.io/docs
+.abstra/
+
+# Visual Studio Code
+#  Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore
+#  that can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
+#  and can be added to the global gitignore or merged into this file. However, if you prefer,
+#  you could uncomment the following to ignore the entire vscode folder
+# .vscode/
+
+# Ruff stuff:
+.ruff_cache/
+
+# PyPI configuration file
+.pypirc
+
+# Marimo
+marimo/_static/
+marimo/_lsp/
+__marimo__/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# private/public key
+.keys/
+
+workers
+
+
+========== .pre-commit-config.yaml ==========
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.11.2
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - pydantic>=2.11.7
+          - types-requests
+          - types-pyyaml
+          - fastapi>=0.116.1
+          - sqlalchemy>=2.0.42
+          - pytest>=8.4.1
+        args: [--ignore-missing-imports]
+        exclude: ^(tests/|scripts/|alembic/)
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: debug-statements
+
+
+========== .python-version ==========
+
+3.13
+
+
+========== Dockerfile ==========
+
+FROM python:3.13-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    libpq-dev \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY pyproject.toml LICENSE README.md ./
+
+RUN pip install uv
+RUN uv sync
+
+COPY . /app
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+
+========== LICENSE ==========
+
+Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+
+Copyright (c) 2025 [gist591]
+
+This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+
+You are free to:
+- Share — copy and redistribute the material in any medium or format
+- Adapt — remix, transform, and build upon the material
+
+Under the following terms:
+- Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were made.
+- NonCommercial — You may not use the material for commercial purposes.
+- ShareAlike — If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original.
+
+To view a copy of this license, visit:
+http://creativecommons.org/licenses/by-nc-sa/4.0/
+
+or send a letter to:
+Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+
+
+========== README.md ==========
+
+## On call система для автоматизации дежурств и отслеживания инцидентов с нотификацией
+
+
+## Лицензия
+
+Этот проект лицензирован под Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+
+Это означает, что вы можете:
+- ✅ Использовать в некоммерческих целях
+- ✅ Изменять и создавать производные работы
+- ✅ Распространять
+
+При условии:
+- ⚠️ Указания авторства
+- ⚠️ Некоммерческого использования
+- ⚠️ Распространения производных работ под той же лицензией
+
+Подробнее: [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
+
+========== alembic.ini ==========
+
+# A generic, single database configuration.
+
+[alembic]
+# path to migration scripts.
+# this is typically a path given in POSIX (e.g. forward slashes)
+# format, relative to the token %(here)s which refers to the location of this
+# ini file
+script_location = %(here)s/alembic
+
+# template used to generate migration file names; The default value is %%(rev)s_%%(slug)s
+# Uncomment the line below if you want the files to be prepended with date and time
+# see https://alembic.sqlalchemy.org/en/latest/tutorial.html#editing-the-ini-file
+# for all available tokens
+# file_template = %%(year)d_%%(month).2d_%%(day).2d_%%(hour).2d%%(minute).2d-%%(rev)s_%%(slug)s
+
+# sys.path path, will be prepended to sys.path if present.
+# defaults to the current working directory.  for multiple paths, the path separator
+# is defined by "path_separator" below.
+prepend_sys_path = .
+
+
+# timezone to use when rendering the date within the migration file
+# as well as the filename.
+# If specified, requires the python>=3.9 or backports.zoneinfo library and tzdata library.
+# Any required deps can installed by adding `alembic[tz]` to the pip requirements
+# string value is passed to ZoneInfo()
+# leave blank for localtime
+# timezone =
+
+# max length of characters to apply to the "slug" field
+# truncate_slug_length = 40
+
+# set to 'true' to run the environment during
+# the 'revision' command, regardless of autogenerate
+# revision_environment = false
+
+# set to 'true' to allow .pyc and .pyo files without
+# a source .py file to be detected as revisions in the
+# versions/ directory
+# sourceless = false
+
+# version location specification; This defaults
+# to <script_location>/versions.  When using multiple version
+# directories, initial revisions must be specified with --version-path.
+# The path separator used here should be the separator specified by "path_separator"
+# below.
+# version_locations = %(here)s/bar:%(here)s/bat:%(here)s/alembic/versions
+
+# path_separator; This indicates what character is used to split lists of file
+# paths, including version_locations and prepend_sys_path within configparser
+# files such as alembic.ini.
+# The default rendered in new alembic.ini files is "os", which uses os.pathsep
+# to provide os-dependent path splitting.
+#
+# Note that in order to support legacy alembic.ini files, this default does NOT
+# take place if path_separator is not present in alembic.ini.  If this
+# option is omitted entirely, fallback logic is as follows:
+#
+# 1. Parsing of the version_locations option falls back to using the legacy
+#    "version_path_separator" key, which if absent then falls back to the legacy
+#    behavior of splitting on spaces and/or commas.
+# 2. Parsing of the prepend_sys_path option falls back to the legacy
+#    behavior of splitting on spaces, commas, or colons.
+#
+# Valid values for path_separator are:
+#
+# path_separator = :
+# path_separator = ;
+# path_separator = space
+# path_separator = newline
+#
+# Use os.pathsep. Default configuration used for new projects.
+path_separator = os
+
+# set to 'true' to search source files recursively
+# in each "version_locations" directory
+# new in Alembic version 1.10
+# recursive_version_locations = false
+
+# the output encoding used when revision files
+# are written from script.py.mako
+# output_encoding = utf-8
+
+# database URL.  This is consumed by the user-maintained env.py script only.
+# other means of configuring database URLs may be customized within the env.py
+# file.
+sqlalchemy.url = driver://user:pass@localhost/dbname
+
+
+[post_write_hooks]
+# post_write_hooks defines scripts or Python functions that are run
+# on newly generated revision scripts.  See the documentation for further
+# detail and examples
+
+# format using "black" - use the console_scripts runner, against the "black" entrypoint
+# hooks = black
+# black.type = console_scripts
+# black.entrypoint = black
+# black.options = -l 79 REVISION_SCRIPT_FILENAME
+
+# lint with attempts to fix using "ruff" - use the module runner, against the "ruff" module
+# hooks = ruff
+# ruff.type = module
+# ruff.module = ruff
+# ruff.options = check --fix REVISION_SCRIPT_FILENAME
+
+# Alternatively, use the exec runner to execute a binary found on your PATH
+# hooks = ruff
+# ruff.type = exec
+# ruff.executable = ruff
+# ruff.options = check --fix REVISION_SCRIPT_FILENAME
+
+# Logging configuration.  This is also consumed by the user-maintained
+# env.py script only.
+[loggers]
+keys = root,sqlalchemy,alembic
+
+[handlers]
+keys = console
+
+[formatters]
+keys = generic
+
+[logger_root]
+level = WARNING
+handlers = console
+qualname =
+
+[logger_sqlalchemy]
+level = WARNING
+handlers =
+qualname = sqlalchemy.engine
+
+[logger_alembic]
+level = INFO
+handlers =
+qualname = alembic
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = NOTSET
+formatter = generic
+
+[formatter_generic]
+format = %(levelname)-5.5s [%(name)s] %(message)s
+datefmt = %H:%M:%S
+
+
+========== alembic/README ==========
+
+Generic single-database configuration.
+
+
+========== alembic/env.py ==========
+
+from logging.config import fileConfig
+
+from sqlalchemy import engine_from_config, pool
+
+from alembic import context
+from to_the_hell.oncallhub.core.config import settings
+from to_the_hell.oncallhub.infra.db.models.base_orm import Base
+
+config = context.config
+
+database_url = settings.get_database_url
+
+if database_url.startswith("postgresql+asyncpg://"):
+    sync_database_url = database_url.replace("postgresql+asyncpg://", "postgresql://")
+else:
+    sync_database_url = database_url
+
+
+config.set_main_option(
+    "sqlalchemy.url",
+    sync_database_url,
+)
+
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
+
+target_metadata = Base.metadata
+
+
+def run_migrations_offline() -> None:
+    """Run migrations in 'offline' mode
+
+    This configures the context with just a URL
+    and not an Engine, though an Engine is acceptable
+    here as well.  By skipping the Engine creation
+    we don't even need a DBAPI to be available.
+
+    Calls to context.execute() here emit the given string to the
+    script output"""
+
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+def run_migrations_online() -> None:
+    """Run migrations in 'online' mode
+
+    In this scenario we need to create an Engine
+    and associate a connection with the context"""
+    connectable = engine_from_config(
+        config.get_section(config.config_ini_section, {}),
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
+
+    with connectable.connect() as connection:
+        context.configure(connection=connection, target_metadata=target_metadata)
+
+        with context.begin_transaction():
+            context.run_migrations()
+
+
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()
+
+
+========== alembic/script.py.mako ==========
+
+"""${message}
+
+Revision ID: ${up_revision}
+Revises: ${down_revision | comma,n}
+Create Date: ${create_date}
+
+"""
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+${imports if imports else ""}
+
+# revision identifiers, used by Alembic.
+revision: str = ${repr(up_revision)}
+down_revision: Union[str, Sequence[str], None] = ${repr(down_revision)}
+branch_labels: Union[str, Sequence[str], None] = ${repr(branch_labels)}
+depends_on: Union[str, Sequence[str], None] = ${repr(depends_on)}
+
+
+def upgrade() -> None:
+    """Upgrade schema."""
+    ${upgrades if upgrades else "pass"}
+
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    ${downgrades if downgrades else "pass"}
+
+
+========== alembic/versions/ba7d1de52dc4_add_incidentdutyorm_for_incident_duty_.py ==========
+
+
+
+========== all_files.txt ==========
+
+
+
+========== config.py ==========
+
+
+
+========== docker-compose.yml ==========
+
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+
+========== keys/private.pem ==========
+
+-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDMbmGppy+uC4as
+IAWcytuWMSaPudQLS59AhcTv+5iDoAJ0nPdAs+cmsm++zmWLiBPk5Sc8DR1/RHXd
+qaMs+C3m7fDPiLh467kC8ZA31eZkR0QWlQ8GdvVIE3e+M/ucOAExzTmsrHr3xDM4
+ZZXeQyaKDzWlAXdpLYFMMh7KxHAfCOU/EzVgF5jxmvNw5kp/PCh7tt1B/KE0nfGk
+ani0he+k1mB8gaz3qzwLy2+zFXxqjf7tfakQsansVw+q/6ShvA0J7L1um45eZGso
+cBQArCUL8wOZqAE/l3dFFBdfr0/gVDqQ0kGHoZ1NAqSDQqX9u3iKPQ30LIuggfla
+WVJ+pcPFAgMBAAECggEACdY34dN3Il9QnCCwVHKYbVoxGlJdRyvc3lxxdQC8vnyp
+EZZp+VWOxlhosxw4W6XxGx8Bq8yPwkt3hnJ+tQ++GbISV9Ii2kKxdNhN0bn7q5CY
+UKPchLmdpNm29dKHhWVWfWB8KXhlNF3e/xQ4SWkexh7kPGvdJJT5d0KkI6qfIIcV
+iMfeqpoOIN+hcW19DknCpraCY8dV8uu9ueZZpxDN7IrY6CeE5op2goFT+8GM1s9r
+KOGMTZTLYnOphn2M2rkpd4yXsufxpiBfwIEpyfB0oqUBqwZWxUN76EXoK5xQpDt+
+Fdm0jgVRJ86l+52mfvM6CL+A1FvWHXALEpHjf6djgQKBgQDlCrpK0+79JRslG582
+49eTZsOvh7sZNzPexHIZHe28y5/RsUgSTMqhODILeRqljmH0CmJR86MyEfWvHIKO
+1d+vMY8AyGO0wZl1Uht+0GSDz/CJD7h8rSu895igCv5djd23H8kMlDvp1MSglFw/
+ilhyBLqc1UmmStXQq3kSF6MLQQKBgQDkfhtYgfPdHRbv0KK60Io2yznL7F25AGcO
+4rlfrSAYHLuIvu6rwD0a2XUQhgB5OwzU1ndsdAhXhgfrR7wDD+25PH8U5ES2alZ6
+NeK+vob8BpT7h91ucTKanyoByAIQrfEHP9usOdS9kQSZCewIeiWyDmAYuitkMjmI
+TbUEkc0rhQKBgQDT1VEpBcxieqAZeOuPM7jdDk1sGcfUcXba0KuKSWDonRdqNGGo
+8zbxVu0KKW6YshAsSjJXA1PrairlUyP5ARvJh7dwDOYSdn/8vvzJE+ny8y3PRifl
+v6/VLNYPJzvMwPnPdWlX5f1nra5RqgWLiuN0SKVjiex9DXelcAIg1pWoQQKBgFHJ
+/jnhUoyMlCBFu2pJqZ/RgR/IvQey6DEA4UApNXrMFijtx3s9NeI9gtTmUpcSlxY8
+qsTsh+vkc0M6C0fBVOPgjtDIoPv29nuKfF6wzpq6NGwRByc4Z9fHL38xu+OCj+t7
+ZUOx87/jgBTT42RpbMLeuHFBerTD8aojvq8jDaENAoGAfN0OchM3+hOaWeyBHwNn
+xEBQmxfspwPX8U1WPunAIVrH5/i+fB5Vk34BndQLrMjWTPS9Bo1QaB6HJxnM0fwV
+O4fJ9wGPe9n/tymUcQGinwVP4vWR5hcT219nL56HgO5uPuPoZt+6rjBW44MEzFls
+uz6V3HSpq3KpvrT4/nK4fwc=
+-----END PRIVATE KEY-----
+
+
+========== keys/public.pem ==========
+
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzG5hqacvrguGrCAFnMrb
+ljEmj7nUC0ufQIXE7/uYg6ACdJz3QLPnJrJvvs5li4gT5OUnPA0df0R13amjLPgt
+5u3wz4i4eOu5AvGQN9XmZEdEFpUPBnb1SBN3vjP7nDgBMc05rKx698QzOGWV3kMm
+ig81pQF3aS2BTDIeysRwHwjlPxM1YBeY8ZrzcOZKfzwoe7bdQfyhNJ3xpGp4tIXv
+pNZgfIGs96s8C8tvsxV8ao3+7X2pELGp7FcPqv+kobwNCey9bpuOXmRrKHAUAKwl
+C/MDmagBP5d3RRQXX69P4FQ6kNJBh6GdTQKkg0Kl/bt4ij0N9CyLoIH5WllSfqXD
+xQIDAQAB
+-----END PUBLIC KEY-----
+
+
+========== main.py ==========
+
+
+
+========== manage.py ==========
+
+
+
+========== pyproject.toml ==========
+
+[project]
+name = "to_the_hell"
+version = "0.1.0"
+license = {file = "LICENSE"}
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "asyncpg>=0.30.0",
+    "fastapi>=0.116.1",
+    "pre-commit>=4.2.0",
+    "pydantic[mypy]>=2.11.7",
+    "pydantic-settings>=2.10.1",
+    "pytest>=8.4.1",
+    "sqlalchemy>=2.0.42",
+    "pytest-asyncio>=1.1.0",
+    "aiosqlite>=0.21.0",
+    "python-multipart>=0.0.20",
+    "pyjwt[crypto]>=2.8.0",
+    "passlib[bcrypt]>=1.7.4",
+    "python-multipart>=0.0.9", # для form data
+    "alembic>=1.16.5",
+    "loguru>=0.7.3",
+    "mako>=1.3.10",
+    "psycopg2>=2.9.11",
+    "celery>=5.5.3",
+    "pytest-cov>=6.2.1",
+    "redis>=6.4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-cov",
+    "mypy>=1.17.1",
+    "pre-commit>=4.2.0",
+    "pytest-mypy-plugins>=3.2.0",
+    "ruff>=0.12.7",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["to_the_hell"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "DTZ",    # flake8-datetimez
+    "T10",    # flake8-debugger
+    "T20",    # flake8-print
+    "Q",      # flake8-quotes
+    "RET",    # flake8-return
+    "SIM",    # flake8-simplify
+    "PTH",    # flake8-use-pathlib
+    "ERA",    # flake8-eradicate
+    "PL",     # pylint
+    "RUF",    # ruff-specific
+]
+
+ignore = [
+    "E501",
+    "PLR0913",
+]
+
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401", "F403"]
+"tests/*" = ["T20", "S101"]
+"main.py" = ["T201"]
+"scripts/*" = ["T201"]
+"*/api/routers/*.py" = ["B008"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["to_the_hell", "oncallhub"]
+
+[tool.ruff.lint.flake8-quotes]
+docstring-quotes = "double"
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+follow_imports = "normal"
+ignore_missing_imports = false
+plugins = ["pydantic.mypy"]
+
+exclude = [
+    ".venv",
+    "venv",
+    "build",
+    "dist",
+    "alembic"
+]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_untyped_decorators = false
+
+[[tool.mypy.overrides]]
+module = "scripts.*"
+disallow_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = [
+    "pandas.*",
+    "numpy.*",
+    "pydantic.*",
+    "pydantic_settings.*",
+    "fastapi.*",
+    "pytest.*",
+    "pytest_asyncio.*",
+    "sqlalchemy.*",
+    "alembic.*"
+]
+ignore_missing_imports = true
+
+# Специфич: CommandBusные настройки для Pydantic
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+[[tool.mypy.overrides]]
+module = 'pydantic'
+ignore_missing_imports = false
+
+
+========== pytest.ini ==========
+
+[pytest]
+addopts = --cov=to_the_hell
+
+
+========== requirements.txt ==========
+
+aiosqlite==0.21.0
+alembic==1.16.5
+annotated-types==0.7.0
+anyio==4.10.0
+asyncpg==0.30.0
+bcrypt==4.3.0
+cffi==2.0.0
+cfgv==3.4.0
+cryptography==46.0.1
+distlib==0.4.0
+fastapi==0.116.1
+filelock==3.18.0
+greenlet==3.2.3
+identify==2.6.12
+idna==3.10
+iniconfig==2.1.0
+loguru==0.7.3
+mako==1.3.10
+markupsafe==3.0.2
+nodeenv==1.9.1
+packaging==25.0
+passlib==1.7.4
+platformdirs==4.3.8
+pluggy==1.6.0
+pre-commit==4.2.0
+psycopg2==2.9.11
+pycparser==2.23
+pydantic==2.11.7
+pydantic-core==2.33.2
+pydantic-settings==2.10.1
+pygments==2.19.2
+pyjwt==2.10.1
+pytest==8.4.1
+pytest-asyncio==1.1.0
+python-dotenv==1.1.1
+python-multipart==0.0.20
+pyyaml==6.0.2
+sniffio==1.3.1
+sqlalchemy==2.0.42
+starlette==0.47.2
+-e file:///home/fox/Projects/ToHellAsaJuniorOrToHeavenAsaMid
+typing-extensions==4.14.1
+typing-inspection==0.4.1
+virtualenv==20.33.1
+
+
+========== scripts/seed.py ==========
+
+# scripts/seed.py
+import asyncio
+from datetime import UTC, datetime, timedelta
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from to_the_hell.oncallhub.infra.db.models.devops import DevopsORM
+from to_the_hell.oncallhub.infra.db.models.duty import DutyORM
+from to_the_hell.oncallhub.infra.db.models.incident import IncidentORM
+from to_the_hell.oncallhub.infra.db.session import async_session_factory
+
+
+async def seed_devops(session: AsyncSession) -> list[int]:
+    """Create test devops users"""
+    devops_data = [
+        {"name": "Иван Петров", "telegram_username": "@ivan_ops"},
+        {"name": "Мария Сидорова", "telegram_username": "@maria_dev"},
+        {"name": "Алексей Гречанов", "telegram_username": "@alex_sre"},
+    ]
+
+    devops_ids = []
+    for data in devops_data:
+        devops = DevopsORM(**data)
+        session.add(devops)
+        await session.flush()
+        devops_ids.append(devops.id)
+
+    await session.commit()
+    print(f"Created {len(devops_data)} devops users")
+    return devops_ids
+
+
+async def seed_duties(session: AsyncSession, devops_ids: list[int]) -> None:
+    """Create duty schedule for one week"""
+    now = datetime.now(UTC).replace(hour=9, minute=0, second=0, microsecond=0)
+
+    duties = []
+    for i in range(7):
+        duty = DutyORM(
+            user_id=devops_ids[i % len(devops_ids)],
+            start_time=now + timedelta(days=i),
+            end_time=now + timedelta(days=i + 1),
+            status=True,
+        )
+        duties.append(duty)
+
+    session.add_all(duties)
+    await session.commit()
+    print(f"Created {len(duties)} duties")
+
+
+async def seed_incidents(session: AsyncSession) -> None:
+    """Create test incidents"""
+    now = datetime.now(UTC)
+
+    incidents_data = [
+        {
+            "description": "База данных недоступна на production",
+            "incident_created": (now - timedelta(hours=2)).timestamp(),
+            "status": "new",
+            "priority": 4,  # critical
+            "incident_assigned": None,
+            "assigned_duty": None,
+        },
+        {
+            "description": "Высокая нагрузка CPU на worker-01",
+            "incident_created": (now - timedelta(days=1)).timestamp(),
+            "incident_assigned": (now - timedelta(hours=23)).timestamp(),
+            "status": "assigned",
+            "priority": 3,  # high
+            "assigned_duty": [],
+        },
+        {
+            "description": "SSL сертификат истекает через 7 дней",
+            "incident_created": (now - timedelta(days=3)).timestamp(),
+            "incident_assigned": (now - timedelta(days=2)).timestamp(),
+            "status": "resolved",
+            "priority": 1,  # low
+            "assigned_duty": [],
+        },
+    ]
+
+    for data in incidents_data:
+        incident = IncidentORM(**data)
+        session.add(incident)
+
+    await session.commit()
+    print(f"Created {len(incidents_data)} incidents")
+
+
+async def main() -> None:
+    """Main seed function"""
+    print("Starting seed script...")
+
+    async with async_session_factory() as session:
+        try:
+            devops_ids = await seed_devops(session)
+            await seed_duties(session, devops_ids)
+            await seed_incidents(session)
+
+            print("\nSeed completed successfully!")
+
+        except Exception as e:
+            print(f"❌ Error: {e}")
+            await session.rollback()
+            raise
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+
+
+========== tatus ==========
+
+[33mcommit df1b11b694910a0a067983f06a636c79025114fb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/test-ci[m[33m, [m[1;31morigin/feature/test-ci[m[33m)[m
+Author: gist591 <leonid24112006@yandex.ru>
+Date:   Fri Sep 5 07:41:25 2025 +0300
+
+    new branch
+
+[33mcommit def5547f5f65af27b3c4647191898eff61b958b3[m[33m ([m[1;31morigin/master[m[33m, [m[1;32mmaster[m[33m)[m
+Author: gist591 <leonid24112006@yandex.ru>
+Date:   Fri Sep 5 07:27:41 2025 +0300
+
+    Конфигурирование github workflow
+
+[33mcommit 9cc9602b225c85bbc84ccde106a0277e9c139e48[m
+Author: gist591 <leonid24112006@yandex.ru>
+Date:   Fri Sep 5 06:34:27 2025 +0300
+
+    Конфигурирование github workflow
+
+[33mcommit c783ef892eca450c41c6c733f0a2eaa117f3055d[m
+Author: gist591 <leonid24112006@yandex.ru>
+Date:   Fri Sep 5 06:19:33 2025 +0300
+
+    Критическая ошибка в github workflow
+
+[33mcommit 58fea841ce4aa4e90dfe9a114db825e863909dd4[m
+Author: gist591 <leonid24112006@yandex.ru>
+Date:   Fri Sep 5 06:12:24 2025 +0300
+
+    Переработаны команды для Uses Cases, обработчики команд теперь в domain/application, в routers теперь все работает через команды, борьба с mypy и добавление лицензии
+
+[33mcommit d0b6de1753c02cf15ffcae5be8aceeb07286108a[m
+Author: gist591 <leonid24112006@yandex.ru>
+Date:   Sun Aug 31 08:58:17 2025 +0300
+
+    Command Pattern для Use Cases (domain/commands), FastAPI endpoints v1: /incidents, /duties, тесты для use cases (commands), value_objects, entities и services)
+
+[33mcommit 7c727e9c98097ff7ef1cfaaf258c2e1f7b79ab34[m
+Author: Leonid Laktionov <lglaktionov@edu.hse.ru>
+Date:   Tue Aug 26 20:32:27 2025 +0300
+
+    Заготовки для валидации (api/validators/*) + исключения при валидации (api/exceptions/*)
+
+[33mcommit 505cac6fd5cd3411b02aab6abee0256f2e9274c8[m
+Author: gist591 <leonid24112006@yandex.ru>
+Date:   Sat Aug 23 03:50:50 2025 +0300
+
+    Добавлены Value objects в директории domain/value_objects: UserId, IncidentId, DutyId, Priority, TimeRange + небольшие правки опечаток и стилевых ошибок
+
+[33mcommit 1d5f30a8593f3e8646b21492f91007d8cbced2b5[m
+Author: gist59 <leonid24112006@yandex.ru>
+Date:   Sun Aug 17 06:32:56 2025 +0300
+
+    Незначительные правки опечаток
+
+[33mcommit 97daed0a23459b13404cad8124216366d28b5f34[m
+Author: gist59 <leonid24112006@yandex.ru>
+Date:   Sun Aug 17 05:52:24 2025 +0300
+
+    CI/CD: first Github Actions pipeline
+
+[33mcommit 83846d6220f99f6942305693d5966451d6138dee[m
+Author: Leonid Laktionov <lglaktionov@edu.hse.ru>
+Date:   Fri Jul 25 16:16:10 2025 +0300
+
+    Небольшые стилевые правки
+
+[33mcommit b7bddb71758c6d3f23941ceda7cde85c4366c29f[m
+Author: Leonid Laktionov <lglaktionov@edu.hse.ru>
+Date:   Fri Jul 25 02:54:56 2025 +0300
+
+    Небольшые стилевые правки
+
+[33mcommit c78d65f00488c041f12dbede7eea0293c112a914[m
+Author: Leonid Laktionov <lglaktionov@edu.hse.ru>
+Date:   Fri Jul 25 02:54:50 2025 +0300
+
+    Небольшые стилевые правки
+
+[33mcommit fe64b7be80dd423cec7d41769ee49641bdf6c40f[m
+Author: Leonid Laktionov <lglaktionov@edu.hse.ru>
+Date:   Thu Jul 24 05:26:43 2025 +0300
+
+    Небольшые стилевые правки
+
+[33mcommit 759f8528eadbdb9c759ad11e5e384cd4ab10ec38[m
+Author: Leonid Laktionov <lglaktionov@edu.hse.ru>
+Date:   Thu Jul 24 05:12:44 2025 +0300
+
+    Добавил UserRepository как Protocol, добавил PostgresUserRepository, переименовал DutyRepostiory в PostgresDutyRepository, Создал FakeUserRepository в фикстурах (НО НАРУШЕНИЕ DRY С КЛАССОМ PostgresUserRepository + чистка ранее не добавленных в .gitignore файлов
+
+[33mcommit 6735f6b3bdd950e2bb36689114f6ab751658260d[m
+Author: Leonid Laktionov <lglaktionov@edu.hse.ru>
+Date:   Thu Jul 24 01:52:57 2025 +0300
+
+    Реализованы модели User, Duty, Incident, Репозиторий для Duty, создана фабрика сессия на asyncpg, начало работы с assign_duty, на данный момент просто выводит f строку с нужным текстом без обращений к бд, чистая загрушка
+
+
+========== tests/conftest.py ==========
+
+import pytest
+from collections.abc import AsyncIterator
+from random import randint
+
+import pytest_asyncio
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+from to_the_hell.oncallhub.domain.entities import Devops
+from to_the_hell.oncallhub.domain.repositories import BaseDevopsRepository
+
+from datetime import datetime, timedelta
+
+from tests.fakes import (
+    FakeDutyRepository,
+    FakeUserRepository,
+    FakeDuty,
+    FakeUser
+)
+from tests.fakes import FakeTelegramNotificationService
+
+pytest_plugins = ["pytest_asyncio"]
+
+
+class FakeDevopsRepostitory(BaseDevopsRepository):
+    """
+    Fake devops repository for tests
+    """
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def create(self, devops: Devops) -> Devops:
+        return devops
+
+
+FAKE_get_database_url = "sqlite+aiosqlite:///:memory:"
+
+async_engine = create_async_engine(url=FAKE_get_database_url)
+async_session_factory = async_sessionmaker(async_engine, expire_on_commit=False)
+
+
+@pytest_asyncio.fixture  # type: ignore[misc]
+async def get_session() -> AsyncIterator[AsyncSession]:
+    async_engine = create_async_engine(url=FAKE_get_database_url, echo=True)
+    async_session_factory = async_sessionmaker(async_engine, expire_on_commit=False)
+
+    async with async_session_factory() as session:
+        yield session
+
+    await async_engine.dispose()
+
+
+@pytest.fixture
+def duty_repo():
+    """Fixture: Clean duty repository for each test"""
+    repo = FakeDutyRepository()
+    yield repo
+    repo.clear()
+
+
+@pytest.fixture
+def user_repo():
+    """Fixture: Clean user repository for each test"""
+    repo = FakeUserRepository()
+    yield repo
+    repo.clear()
+
+
+@pytest.fixture
+def notification_service():
+    """Fixture: Clean notification service for each test"""
+    service = FakeTelegramNotificationService()
+    yield service
+    service.clear()
+
+
+@pytest.fixture
+def sample_user(user_repo):
+    """Fixture: Create sample user with Telegram"""
+    user = FakeUser(
+        id=randint(0, 10000),
+        email="devops@example.com",
+        full_name="John DevOps",
+        telegram_chat_id="123456789"
+    )
+    user_repo.add(user)
+    return user
+
+
+@pytest.fixture
+def sample_duty_in_24h(duty_repo, sample_user):
+    """Fixture: Create duty starting in 24 hours"""
+    now = datetime.utcnow()
+    duty = FakeDuty(
+        id=randint(0, 10000),
+        devops_id=sample_user.id,
+        start_time=now + timedelta(hours=24),
+        end_time=now + timedelta(hours=32),
+        reminder_24h_sent=False,
+        reminder_2h_sent=False,
+        reminder_10m_sent=False
+    )
+    duty_repo.add(duty)
+    return duty
+
+
+@pytest.fixture
+def sample_duty_in_2h(duty_repo, sample_user):
+    """Fixture: Create duty starting in 2 hours"""
+    now = datetime.utcnow()
+    duty = FakeDuty(
+        id=randint(0, 10000),
+        devops_id=sample_user.id,
+        start_time=now + timedelta(hours=2),
+        end_time=now + timedelta(hours=10),
+        reminder_24h_sent=True,  # 24h already sent
+        reminder_2h_sent=False,
+        reminder_10m_sent=False
+    )
+    duty_repo.add(duty)
+    return duty
+
+
+@pytest.fixture
+def sample_duty_in_10m(duty_repo, sample_user):
+    """Fixture: Create duty starting in 10 minutes"""
+    now = datetime.utcnow()
+    duty = FakeDuty(
+        id=randint(0, 10000),
+        devops_id=sample_user.id,
+        start_time=now + timedelta(minutes=10),
+        end_time=now + timedelta(hours=8),
+        reminder_24h_sent=True,  # Previous reminders sent
+        reminder_2h_sent=True,
+        reminder_10m_sent=False
+    )
+    duty_repo.add(duty)
+    return duty
+
+
+========== tests/domain/services/test_duty.py ==========
+
+from datetime import UTC, datetime, timedelta
+from random import randint
+
+import pytest
+
+from to_the_hell.oncallhub.domain.entities import Devops, Duty
+from to_the_hell.oncallhub.domain.repositories import BaseDutyRepository
+
+
+class FakeDutyRepository(BaseDutyRepository):
+    """Fake repository for testing"""
+
+    def __init__(self) -> None:
+        self.duties: list[Duty] = []
+
+    async def create(self, duty: Duty) -> Duty:
+        """Create duty in memory"""
+        duty.id = randint(0, 100000)
+        self.duties.append(duty)
+        return duty
+
+    async def get_current_duty(self) -> Duty | None:
+        """Get current duty - not implemented for tests"""
+        return None
+
+    async def get_all_duties(self) -> list[Duty]:
+        """Get all duties - not implemented for tests"""
+        return self.duties
+
+
+@pytest.mark.asyncio  # type: ignore[misc]
+async def test_create_duty() -> None:
+    """Test duty creation through repository"""
+    repo = FakeDutyRepository()
+
+    devops = Devops(
+        id=randint(0, 100000),
+        name="Test Devops",
+        telegram_username="@hello",
+        email="test@example.com",
+        phone="8999999999",
+    )
+    duty_id = randint(0, 100000)
+
+    duty = Duty(
+        id=duty_id,
+        devops_id=devops.id or randint(0, 100000),
+        start_time=datetime.now(tz=UTC),
+        end_time=datetime.now(tz=UTC) + timedelta(hours=8),
+        status=True,
+    )
+
+    created_duty = await repo.create(duty)
+
+    assert created_duty.id is not None
+    assert created_duty.devops_id == duty.devops_id
+    assert created_duty.status is True
+
+
+========== tests/domain/services/test_incident.py ==========
+
+from random import randint
+
+import pytest
+
+from to_the_hell.oncallhub.domain.entities import Devops, Incident
+from to_the_hell.oncallhub.domain.value_objects.incident_priority import (
+    IncidentPriority,
+)
+
+
+@pytest.mark.asyncio  # type: ignore[misc]
+async def test_create_incident() -> None:
+    devops = Devops(
+        id=uuid.randint(0, 10000),
+        name="Test Devops",
+        telegram_username="hi",
+        email="test@example.com",
+        phone="89997655656",
+    )
+
+    incident = Incident(
+        id=uuid.randint(0, 10000),
+        title="Test Incident",
+        description="Test Description",
+        priority=IncidentPriority.HIGH,
+    )
+
+    assert incident.title == "Test Incident"
+    assert incident.description == "Test Description"
+    assert incident.priority == IncidentPriority.HIGH
+
+    assert devops.name == "Test Devops"
+
+
+@pytest.mark.asyncio  # type: ignore[misc]
+async def test_incident_status_transition() -> None:
+    devops = Devops(
+        id=uuid.randint(0, 10000),
+        name="Test Devops",
+        telegram_username="hello",
+        email="test@example.com",
+        phone="89999999999",
+    )
+
+    incident = Incident(
+        id=uuid.randint(0, 10000),
+        title="Test Incident",
+        description="Test Description",
+        priority=IncidentPriority.MEDIUM,
+    )
+
+    assert incident.title == "Test Incident"
+    assert incident.description == "Test Description"
+    assert incident.priority != IncidentPriority.HIGH
+
+    assert devops.name == "Test Devops"
+
+
+========== tests/domain/test_entities.py ==========
+
+from datetime import UTC, datetime, timedelta
+from random import randint
+
+from to_the_hell.oncallhub.domain.entities import Devops, Duty, Incident
+from to_the_hell.oncallhub.domain.value_objects.incident_priority import (
+    IncidentPriority,
+)
+
+
+def test_devops_creation() -> None:
+    """Test devops entity creation"""
+    devops = Devops(
+        id=randint(0, 100000),
+        name="Test Devops",
+        telegram_username="go",
+        email="test@example.com",
+        phone="+1234567890",
+    )
+
+    assert devops.name == "Test Devops"
+    assert devops.telegram_username == "go"
+    assert devops.email == "test@example.com"
+    assert devops.phone == "+1234567890"
+    assert devops.id
+
+
+def test_duty_creation() -> None:
+    """Test duty entity creation"""
+    devops_id = randint(0, 100000)
+    duty_id = randint(0, 100000)
+    start_time = datetime.now(tz=UTC)
+    end_time = start_time + timedelta(hours=8)
+
+    duty = Duty(
+        id=duty_id,
+        devops_id=devops_id,
+        start_time=start_time,
+        end_time=end_time,
+        status=True,
+    )
+
+    assert duty.id == duty_id
+    assert duty.devops_id == devops_id
+    assert duty.start_time == start_time
+    assert duty.end_time == end_time
+    assert duty.status is True
+    assert duty.created_at is None
+
+
+def test_incident_creation() -> None:
+    """Test incident entity creation"""
+    incident = Incident(
+        id=randint(0, 100000),
+        title="Test Incident",
+        description="Test Description",
+        priority=IncidentPriority.HIGH,
+    )
+
+    assert incident.title == "Test Incident"
+    assert incident.description == "Test Description"
+    assert incident.priority == IncidentPriority.HIGH
+    assert incident.id is None
+    assert incident.assigned_id is None
+    assert incident.comments == []
+
+
+========== tests/domain/test_time_range.py ==========
+
+from datetime import UTC, datetime
+
+import pytest
+
+from to_the_hell.oncallhub.api.exceptions import (
+    ValidationDurationError,
+    ValidationError,
+)
+from to_the_hell.oncallhub.domain.value_objects import TimeRange
+
+
+@pytest.mark.asyncio  # type: ignore[misc]
+@pytest.mark.skip(reason="in that moment method is not exist")
+@pytest.mark.parametrize(
+    ("start", "end", "expected_result"),
+    [
+        (
+            datetime(2024, 1, 1, 18, 25, tzinfo=UTC),
+            datetime(2024, 1, 1, 18, 8, tzinfo=UTC),
+            ValidationError,
+        ),
+        (
+            datetime(2024, 1, 1, 18, 13, tzinfo=UTC),
+            datetime(2024, 1, 1, 18, 24, tzinfo=UTC),
+            ValidationError,
+        ),
+        (
+            datetime(2024, 1, 1, 18, 25, tzinfo=UTC),
+            datetime(2024, 1, 1, 18, 24, tzinfo=UTC),
+            ValidationError,
+        ),
+        (
+            datetime(2024, 1, 1, 18, 0, tzinfo=UTC),
+            datetime(2024, 1, 1, 18, 24, tzinfo=UTC),
+            ValidationDurationError,
+        ),
+        (
+            datetime(2024, 1, 1, 18, 0, tzinfo=UTC),
+            datetime(2024, 1, 1, 18, 24, tzinfo=UTC),
+            "2024-01-01T18:00:00+00:00 - 2024-01-01T18:24:00+00:00",
+        ),
+    ],
+)
+def test_time_range(
+    start: datetime, end: datetime, expected_result: type[Exception] | str
+) -> None:
+    """Test TimeRange validation"""
+    if isinstance(expected_result, type) and issubclass(expected_result, Exception):
+        with pytest.raises(expected_result):
+            TimeRange(start, end)
+    else:
+        assert TimeRange(start, end).__str__() == expected_result
+
+
+========== tests/domain/test_value_objects.py ==========
+
+import pytest
+
+from to_the_hell.oncallhub.domain.value_objects.incident_priority import (
+    IncidentPriority,
+)
+
+
+def test_incident_priority_values() -> None:
+    """Test incident priority enum values"""
+    assert IncidentPriority.LOW.value == "low"
+    assert IncidentPriority.MEDIUM.value == "medium"
+    assert IncidentPriority.HIGH.value == "high"
+    assert IncidentPriority.CRITICAL.value == "critical"
+
+
+def test_incident_priority_comparison() -> None:
+    """Test incident priority comparison"""
+    assert IncidentPriority.LOW < IncidentPriority.MEDIUM
+    assert IncidentPriority.MEDIUM < IncidentPriority.HIGH
+    assert IncidentPriority.HIGH < IncidentPriority.CRITICAL
+
+    assert IncidentPriority.CRITICAL > IncidentPriority.HIGH
+    assert IncidentPriority.HIGH > IncidentPriority.MEDIUM
+    assert IncidentPriority.MEDIUM > IncidentPriority.LOW
+
+
+def test_incident_priority_from_string() -> None:
+    """Test creating priority from string"""
+    assert IncidentPriority.from_string("low") == IncidentPriority.LOW
+    assert IncidentPriority.from_string("MEDIUM") == IncidentPriority.MEDIUM
+    assert IncidentPriority.from_string("High") == IncidentPriority.HIGH
+    assert IncidentPriority.from_string("CRITICAL") == IncidentPriority.CRITICAL
+
+
+def test_incident_priority_from_string_invalid() -> None:
+    """Test creating priority from invalid string"""
+    with pytest.raises(ValueError, match="Invalid priority: invalid"):
+        IncidentPriority.from_string("invalid")
+
+
+def test_incident_priority_string_representation() -> None:
+    """Test priority string representation"""
+    assert str(IncidentPriority.LOW) == "low"
+    assert str(IncidentPriority.MEDIUM) == "medium"
+    assert str(IncidentPriority.HIGH) == "high"
+    assert str(IncidentPriority.CRITICAL) == "critical"
+
+
+========== tests/test_basic_imports.py ==========
+
+from typing import Any
+
+
+def test_basic_imports() -> None:
+    """Test basic imports"""
+    from to_the_hell.oncallhub.domain.commands import (
+        Command,
+        CommandBus,
+        CommandHandler,
+        CommandResult,
+        CommandResultStatus,
+    )
+
+    assert Command is not None
+    assert CommandHandler is not None
+    assert CommandResult is not None
+    assert CommandResultStatus is not None
+    assert CommandBus is not None
+
+
+def test_incident_priority_import() -> None:
+    """Test incident priority imports"""
+    from to_the_hell.oncallhub.domain.value_objects.incident_priority import (
+        IncidentPriority,
+    )
+
+    assert IncidentPriority.LOW == IncidentPriority.LOW
+    assert IncidentPriority.HIGH == IncidentPriority.HIGH
+    assert IncidentPriority.CRITICAL > IncidentPriority.LOW
+
+
+def test_command_result_creation() -> None:
+    """Test command result creation"""
+    from to_the_hell.oncallhub.domain.commands import CommandResult, CommandResultStatus
+
+    success_result: CommandResult[dict[str, Any]] = CommandResult.success(
+        {"id": 1, "name": "test"}
+    )
+    assert success_result.status == CommandResultStatus.SUCCESS
+    assert success_result.data == {"id": 1, "name": "test"}
+
+    failure_result: CommandResult[str] = CommandResult.failure("Something went wrong")
+    assert failure_result.status == CommandResultStatus.FAILURE
+    assert failure_result.error_message == "Something went wrong"
+
+    validation_errors = {"title": ["Title is required"]}
+    validation_result: CommandResult[Any] = CommandResult.validation_error(
+        validation_errors
+    )
+    assert validation_result.status == CommandResultStatus.VALIDATION_ERROR
+    assert validation_result.validation_errors == validation_errors
+
+
+========== tests/test_command_bus_integration.py ==========
+
+from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
+from random import randint
+from typing import Any
+
+import pytest
+
+from to_the_hell.oncallhub.domain.application.handlers.duty_handlers import (
+    CreateDutyHandler,
+    GetAllDutiesHandler,
+    GetCurrentDutyHandler,
+)
+from to_the_hell.oncallhub.domain.commands import (
+    CommandBus,
+    CommandResultStatus,
+)
+from to_the_hell.oncallhub.domain.commands.base import Command
+from to_the_hell.oncallhub.domain.commands.duty_commands import (
+    CreateDutyCommand,
+    GetAllDutiesCommand,
+    GetCurrentDutyCommand,
+)
+from to_the_hell.oncallhub.domain.entities import Duty
+from to_the_hell.oncallhub.domain.repositories import BaseDutyRepository
+
+EXPECTED_TOTAL_DUTIES = 3
+EXPECTED_NEXT_DUTIES = 2
+EXPECTED_SUCCESSFUL_COMMANDS = 5
+
+
+class FakeDutyRepository(BaseDutyRepository):
+    """In-memory repository for testing"""
+
+    def __init__(self):
+        self._storage: list[Duty] = []
+
+    async def create(self, duty: Duty) -> Duty:
+        """Create duty"""
+        self._storage.append(duty)
+        return duty
+
+    async def get_by_id(self, duty_id: int) -> Duty | None:
+        """get duty on ID"""
+        for duty in self._storage:
+            if duty.id == duty_id:
+                return duty
+        return None
+
+    async def get_all_duties(
+        self, limit: int | None = None, offset: int | None = None
+    ) -> list[Duty]:
+        """
+        Get all duties
+        """
+        sorted_duties = sorted(
+            self._storage, key=lambda duty: duty.created_at, reverse=True
+        )
+
+        if offset is not None and offset > 0:
+            sorted_duties = sorted_duties[offset:]
+
+        if limit is not None and limit > 0:
+            sorted_duties = sorted_duties[:limit]
+
+        return sorted_duties
+
+    async def get_current_duty(self) -> Duty | None:
+        """
+        Get current duty
+        """
+        current_time = datetime.now(tz=UTC)
+
+        for duty in self._storage:
+            if duty.status and duty.start_time <= current_time <= duty.end_time:
+                return duty
+
+        return None
+
+    async def update(self, duty: Duty) -> Duty:
+        """Update duty"""
+        for index, stored_duty in enumerate(self._storage):
+            if stored_duty.id == duty.id:
+                self._storage[index] = duty
+                return duty
+        raise ValueError(f"Duty with id {duty.id} not found")
+
+    async def delete(self, duty_id: int) -> bool:
+        """Delete duty"""
+        initial_length = len(self._storage)
+        self._storage = [duty for duty in self._storage if duty.id != duty_id]
+        return len(self._storage) < initial_length
+
+    async def get_by_devops_id(
+        self, devops_id: int, limit: int | None = None, offset: int | None = None
+    ) -> list[Duty]:
+        """Get all duties to a specific devops by id"""
+        filtered_duties = sorted(
+            [duty for duty in self._storage if duty.devops_id == devops_id],
+            key=lambda duty: duty.created_at,
+            reverse=True,
+        )
+
+        if offset is not None and offset > 0:
+            filtered_duties = filtered_duties[offset:]
+
+        if limit is not None and limit > 0:
+            filtered_duties = filtered_duties[:limit]
+
+        return filtered_duties
+
+    async def get_active(
+        self, limit: int | None = None, offset: int | None = None
+    ) -> list[Duty]:
+        """Get active duties"""
+        active_duties = sorted(
+            [duty for duty in self._storage if duty.status is True],
+            key=lambda duty: duty.created_at,
+            reverse=True,
+        )
+
+        if offset is not None and offset > 0:
+            active_duties = active_duties[offset:]
+
+        if limit is not None and limit > 0:
+            active_duties = active_duties[:limit]
+
+        return active_duties
+
+    async def count(self) -> int:
+        """Calculate all duties"""
+        return len(self._storage)
+
+    async def clear(self) -> None:
+        """Clear storage"""
+        self._storage.clear()
+
+    async def exists(self, duty_id: int) -> bool:
+        """Check existing of duty"""
+        return any(duty.id == duty_id for duty in self._storage)
+
+
+class TestDutyCommandsIntegration:
+    """Integration tests for duty commands with real business logic"""
+
+    @pytest.fixture
+    def repository(self) -> FakeDutyRepository:
+        return FakeDutyRepository()
+
+    @pytest.fixture
+    def command_bus(self, repository) -> CommandBus:
+        bus = CommandBus()
+        bus.register_handler(CreateDutyCommand, CreateDutyHandler(repository))
+        bus.register_handler(GetCurrentDutyCommand, GetCurrentDutyHandler(repository))
+        bus.register_handler(GetAllDutiesCommand, GetAllDutiesHandler(repository))
+        return bus
+
+    @pytest.mark.asyncio
+    async def test_create_duty_success(self, command_bus: CommandBus) -> None:
+        """Test creating a duty with valid data"""
+        id = randint(0, 10000)
+        devops_id = randint(0, 100000)
+        start_time = datetime.now(tz=UTC) + timedelta(hours=1)
+        end_time = start_time + timedelta(hours=8)
+
+        command = CreateDutyCommand(
+            id=id, devops_id=devops_id, start_time=start_time, end_time=end_time
+        )
+
+        result = await command_bus.execute(command)
+
+        assert result.status == CommandResultStatus.SUCCESS
+        assert result.data is not None
+        assert result.data.devops_id == devops_id
+        assert result.data.start_time == start_time
+        assert result.data.end_time == end_time
+        assert result.data.status is True
+
+    @pytest.mark.asyncio
+    async def test_create_duty_invalid_time_range(self, command_bus) -> None:
+        """Test validation error when end_time is before start_time"""
+        id = randint(0, 10000)
+        devops_id = randint(0, 100000)
+        start_time = datetime.now(tz=UTC) + timedelta(hours=8)
+        end_time = start_time - timedelta(hours=1)  # Invalid: end before start
+
+        command = CreateDutyCommand(
+            id=id, devops_id=devops_id, start_time=start_time, end_time=end_time
+        )
+
+        result = await command_bus.execute(command)
+
+        assert result.status == CommandResultStatus.VALIDATION_ERROR
+        assert result.validation_errors is not None
+        assert "time_range" in result.validation_errors
+
+    @pytest.mark.asyncio
+    async def test_get_current_duty_exists(self, command_bus, repository) -> None:
+        """Test getting current active duty"""
+        devops_id = randint(0, 1000000)
+        now = datetime.now(tz=UTC)
+        duty = Duty(
+            id=randint(0, 100000),
+            devops_id=devops_id,
+            start_time=now - timedelta(hours=1),
+            end_time=now + timedelta(hours=7),
+            status=True,
+            created_at=now - timedelta(hours=2),
+        )
+        await repository.create(duty)
+
+        command = GetCurrentDutyCommand()
+        result = await command_bus.execute(command)
+
+        assert result.status == CommandResultStatus.SUCCESS
+        assert result.data is not None
+        assert result.data.id == duty.id
+        assert result.data.devops_id == devops_id
+
+    @pytest.mark.asyncio
+    async def test_get_current_duty_none(self, command_bus, repository) -> None:
+        """Test when no current duty exists"""
+        # Create an expired duty
+        past_duty = Duty(
+            id=randint(0, 100000),
+            devops_id=randint(0, 100000),
+            start_time=datetime.now(tz=UTC) - timedelta(hours=10),
+            end_time=datetime.now(tz=UTC) - timedelta(hours=2),
+            status=True,
+            created_at=datetime.now(tz=UTC) - timedelta(hours=11),
+        )
+        await repository.create(past_duty)
+
+        command = GetCurrentDutyCommand()
+        result = await command_bus.execute(command)
+
+        assert result.status == CommandResultStatus.SUCCESS
+        assert result.data is None
+
+    @pytest.mark.asyncio
+    async def test_get_all_duties_with_pagination(
+        self, command_bus: CommandBus, repository
+    ) -> None:
+        """Test getting all duties with limit and offset"""
+        # Create multiple duties
+        for i in range(5):
+            duty = Duty(
+                id=randint(0, 100000),
+                devops_id=randint(0, 10000),
+                start_time=datetime.now(tz=UTC) + timedelta(hours=i * 8),
+                end_time=datetime.now(tz=UTC) + timedelta(hours=(i + 1) * 8),
+                status=True,
+                created_at=datetime.now(tz=UTC) - timedelta(hours=i),
+            )
+            await repository.create(duty)
+
+        # Get first 3 duties
+        command = GetAllDutiesCommand()
+        result = await command_bus.execute(command)
+
+        assert result.status == CommandResultStatus.SUCCESS
+
+    @pytest.mark.asyncio
+    async def test_command_bus_error_handling(self, command_bus) -> None:
+        """Test that CommandBus properly handles missing handlers"""
+
+        # Create a command without registered handler
+        @dataclass
+        class UnregisteredCommand(Command):
+            def get_command_type(self) -> str:
+                return "unregistered"
+
+        command = UnregisteredCommand()
+
+        with pytest.raises(ValueError, match="Handler for command"):
+            await command_bus.execute(command)
+
+
+class TestDutyBusinessRules:
+    """Test business rules and edge cases"""
+
+    @pytest.fixture
+    def repository(self) -> FakeDutyRepository:
+        return FakeDutyRepository()
+
+    @pytest.fixture
+    def handler(self, repository) -> Any:
+        return CreateDutyHandler(repository)
+
+    @pytest.mark.asyncio
+    async def test_duty_duration_validation(self, handler) -> None:
+        """Test duty duration constraints"""
+        # Test minimum duration (if you have such rule)
+        command = CreateDutyCommand(
+            id=randint(0, 100000),
+            devops_id=randint(0, 1000000),
+            start_time=datetime.now(tz=UTC),
+            end_time=datetime.now(tz=UTC) + timedelta(minutes=30),  # Too short
+        )
+
+        result = await handler.handle(command)
+
+        # Adjust based on your business rules
+        # This is an example if you have minimum duration rule
+        if result.status == CommandResultStatus.VALIDATION_ERROR:
+            assert "duration" in str(result.validation_errors)
+
+    @pytest.mark.asyncio
+    async def test_concurrent_duty_creation(self, repository) -> None:
+        """Test that repository handles concurrent operations safely"""
+        handler = CreateDutyHandler(repository)
+
+        # Create multiple duties concurrently
+        import asyncio
+
+        async def create_duty(index: int) -> Any:
+            command = CreateDutyCommand(
+                id=randint(0, 10000),
+                devops_id=randint(0, 100000),
+                start_time=datetime.now(tz=UTC) + timedelta(hours=index * 10),
+                end_time=datetime.now(tz=UTC) + timedelta(hours=(index + 1) * 10),
+            )
+            return await handler.handle(command)
+
+        results = await asyncio.gather(*[create_duty(i) for i in range(5)])
+
+        successful = [r for r in results if r.status == CommandResultStatus.SUCCESS]
+        assert len(successful) == EXPECTED_SUCCESSFUL_COMMANDS
+
+        # Verify all duties have unique IDs
+        duty_ids = [r.data.id for r in successful]
+        assert len(duty_ids) == len(set(duty_ids))
+
+
+class TestCommandBusLifecycle:
+    """Test CommandBus lifecycle and state management"""
+
+    @pytest.mark.asyncio
+    async def test_handler_registration_override(self) -> None:
+        """Test that re-registering handler overwrites previous one"""
+        bus = CommandBus()
+        repo1 = FakeDutyRepository()
+        repo2 = FakeDutyRepository()
+
+        # Register first handler
+        bus.register_handler(CreateDutyCommand, CreateDutyHandler(repo1))
+
+        # Create duty with first handler
+        command = CreateDutyCommand(
+            id=randint(0, 1000000),
+            devops_id=randint(0, 100000),
+            start_time=datetime.now(tz=UTC),
+            end_time=datetime.now(tz=UTC) + timedelta(hours=8),
+        )
+        await bus.execute(command)
+
+        # Re-register with different handler
+        bus.register_handler(CreateDutyCommand, CreateDutyHandler(repo2))
+
+        # Create another duty
+        await bus.execute(command)
+
+        # Verify duties are in different repositories
+        assert len(await repo1.get_all_duties()) == 1
+        assert len(await repo2.get_all_duties()) == 1
+
+    @pytest.mark.asyncio
+    async def test_command_bus_isolation(self) -> None:
+        """Test that different CommandBus instances are isolated"""
+        bus1 = CommandBus()
+        bus2 = CommandBus()
+
+        repo = FakeDutyRepository()
+        bus1.register_handler(CreateDutyCommand, CreateDutyHandler(repo))
+
+        command = CreateDutyCommand(
+            id=randint(0, 1000000),
+            devops_id=randint(0, 100000),
+            start_time=datetime.now(tz=UTC),
+            end_time=datetime.now(tz=UTC) + timedelta(hours=8),
+        )
+
+        # bus1 should handle the command
+        result = await bus1.execute(command)
+        assert result.status == CommandResultStatus.SUCCESS
+
+        # bus2 should fail (no handler registered)
+        with pytest.raises(ValueError):
+            await bus2.execute(command)
+
+
+========== to_the_hell/__init__.py ==========
+
+
+
+========== to_the_hell/oncallhub/__init__.py ==========
+
+
+
+========== to_the_hell/oncallhub/api/__init__.py ==========
+
+
+
+========== to_the_hell/oncallhub/api/deps/__init__.py ==========
+
+from .auth import get_current_user
+from .database import (
+    CommandBusDep,
+    DevopsRepoDep,
+    DutyRepoDep,
+    IncidentRepoDep,
+    SessionDep,
+    get_command_bus_dependency,
+    get_devops_repository,
+    get_duty_repository,
+    get_incident_repository,
+    get_session,
+)
+
+__all__ = [
+    "CommandBusDep",
+    "DevopsRepoDep",
+    "DutyRepoDep",
+    "IncidentRepoDep",
+    "SessionDep",
+    "get_command_bus_dependency",
+    "get_current_user",
+    "get_devops_repository",
+    "get_duty_repository",
+    "get_incident_repository",
+    "get_session",
+]
+
+
+========== to_the_hell/oncallhub/api/deps/auth.py ==========
+
+from typing import Any
+
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from to_the_hell.oncallhub.domain.services.auth_service import verify_token
+
+security = HTTPBearer()
+
+
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),  # noqa: B008
+) -> dict[str, Any]:
+    """
+    Check token and return user's datas
+    """
+    token = credentials.credentials
+    payload = verify_token(token)
+
+    if not payload:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return payload
+
+
+async def get_current_user_optional(
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),  # noqa: B008
+) -> dict[str, Any] | None:
+    """
+    Optional token check
+    """
+    if not credentials:
+        return None
+
+    token = credentials.credentials
+    return verify_token(token)
+
+
+========== to_the_hell/oncallhub/api/deps/database.py ==========
+
+from collections.abc import AsyncIterator
+from typing import Annotated
+
+from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from to_the_hell.oncallhub.domain.application.dependencies import (
+    get_command_bus as create_command_bus,
+)
+from to_the_hell.oncallhub.domain.commands.base import CommandBus
+from to_the_hell.oncallhub.domain.repositories import (
+    BaseDevopsRepository,
+    BaseDutyRepository,
+    BaseIncidentRepository,
+)
+from to_the_hell.oncallhub.infra.db.repositories import (
+    PostgresDevopsRepository,
+    PostgresDutyRepository,
+    PostgresIncidentRepository,
+)
+from to_the_hell.oncallhub.infra.db.session import async_session_factory
+
+
+async def get_session() -> AsyncIterator[AsyncSession]:
+    """
+    Provide database session for FastAPI request scope
+    Each HTTP request gets its own session
+    """
+    async with async_session_factory() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
+
+
+SessionDep = Annotated[AsyncSession, Depends(get_session)]
+
+
+async def get_duty_repository(
+    session: SessionDep,
+) -> BaseDutyRepository:
+    """
+    Provide duty repository with injected session
+
+    Creates new repository instance for each request
+    with request-scoped session.
+    """
+    return PostgresDutyRepository(session)
+
+
+async def get_devops_repository(
+    session: SessionDep,
+) -> BaseDevopsRepository:
+    """Provide devops repository with injected session."""
+    return PostgresDevopsRepository(session)
+
+
+async def get_incident_repository(
+    session: SessionDep,
+) -> BaseIncidentRepository:
+    """Provide incident repository with injected session."""
+    return PostgresIncidentRepository(session)
+
+
+DutyRepoDep = Annotated[BaseDutyRepository, Depends(get_duty_repository)]
+DevopsRepoDep = Annotated[BaseDevopsRepository, Depends(get_devops_repository)]
+IncidentRepoDep = Annotated[BaseIncidentRepository, Depends(get_incident_repository)]
+
+
+async def get_command_bus_dependency(
+    session: SessionDep,
+) -> CommandBus:
+    """
+    Provide configured Command Bus for FastAPI request
+    """
+    return await create_command_bus(session)
+
+
+CommandBusDep = Annotated[CommandBus, Depends(get_command_bus_dependency)]
+
+
+========== to_the_hell/oncallhub/api/exceptions/__init__.py ==========
+
+from .validation_exceptions import ValidationDurationError, ValidationError
+
+__all__ = ["ValidationDurationError", "ValidationError"]
+
+
+========== to_the_hell/oncallhub/api/exceptions/validation_exceptions.py ==========
+
+class ValidationError(Exception):
+    """Exception when trouble with validating"""
+
+    pass
+
+
+class ValidationDurationError(Exception):
+    """Exception when trouble with duration of smwh in vlaidating"""
+
+    pass
+
+
+========== to_the_hell/oncallhub/api/main.py ==========
+
+from fastapi import FastAPI
+
+from to_the_hell.oncallhub.api.routers import auth, duties, incidents
+
+app = FastAPI(
+    title="OnCall Hub",
+    description="DevOps team duty management system",
+    version="0.1.0",
+)
+
+
+@app.get("/")
+async def welcome() -> dict[str, str]:
+    """Root endpoint of the application"""
+    return {"message": "my best project"}
+
+
+app.include_router(auth.router, prefix="/auth", tags=["authentication"])
+app.include_router(duties.router, prefix="/duties", tags=["duties"])
+app.include_router(incidents.router, prefix="/incidents", tags=["incidents"])
+
+
+========== to_the_hell/oncallhub/api/routers/__init__.py ==========
+
+
+
+========== to_the_hell/oncallhub/api/routers/auth.py ==========
+
+from typing import Any
+
+from fastapi import APIRouter, Depends, HTTPException, status
+
+from to_the_hell.oncallhub.api.deps.auth import get_current_user
+from to_the_hell.oncallhub.api.schemas.user import (
+    RefreshTokenSchema,
+    TokenPairSchema,
+    UserLoginSchema,
+)
+from to_the_hell.oncallhub.domain.services.auth_service import (
+    create_token_pair,
+    get_password_hash,
+    refresh_access_token,
+    verify_password,
+)
+from to_the_hell.oncallhub.domain.services.auth_service import logout as logout_user
+
+router = APIRouter()
+
+FAKE_USERS_DB: dict[str, dict[str, Any]] = {
+    "john": {
+        "id": 123,
+        "username": "john",
+        "email": "john@example.com",
+        "hashed_password": get_password_hash("secret"),
+    }
+}
+
+
+@router.post("/login", response_model=TokenPairSchema)
+async def login(user_data: UserLoginSchema) -> TokenPairSchema:
+    """
+    Login - get tokens
+    """
+    user = FAKE_USERS_DB.get(user_data.username)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+        )
+
+    hashed_password: str = user["hashed_password"]
+    assert isinstance(hashed_password, str)
+
+    if not verify_password(user_data.password, hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+        )
+
+    access_token, refresh_token = create_token_pair(user["id"], user["username"])
+
+    return TokenPairSchema(access_token=access_token, refresh_token=refresh_token)
+
+
+@router.post("/refresh", response_model=dict[str, str])
+async def refresh_token(token_data: RefreshTokenSchema) -> dict[str, str]:
+    """
+    Refresh access token
+    """
+    new_access = refresh_access_token(token_data.refresh_token)
+
+    if not new_access:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
+        )
+
+    return {"access_token": new_access, "token_type": "bearer"}
+
+
+@router.post("/logout")
+async def logout(
+    token_data: RefreshTokenSchema,
+    current_user: dict[str, Any] = Depends(get_current_user),
+) -> dict[str, str]:
+    """
+    Logout - revoken refresh token
+    """
+    logout_user(token_data.refresh_token)
+    return {"detail": "Successfully logged out"}
+
+
+@router.get("/me")
+async def get_me(
+    current_user: dict[str, Any] = Depends(get_current_user),
+) -> dict[str, Any]:
+    """
+    Get current user
+    """
+    return current_user
+
+
+========== to_the_hell/oncallhub/api/routers/devops.py ==========
+
+from fastapi import APIRouter
+
+router = APIRouter()
+
+
+========== to_the_hell/oncallhub/api/routers/duties.py ==========
+
+from typing import Any, cast
+
+from fastapi import APIRouter, Depends, HTTPException
+
+from to_the_hell.oncallhub.api.deps import CommandBusDep, get_current_user
+from to_the_hell.oncallhub.api.schemas import DutySchema
+from to_the_hell.oncallhub.domain.commands import CommandResultStatus
+from to_the_hell.oncallhub.domain.commands.duty_commands import (
+    CreateDutyCommand,
+    GetAllDutiesCommand,
+    GetCurrentDutyCommand,
+)
+
+router = APIRouter()
+
+
+@router.get("/duties", response_model=list[DutySchema])
+async def get_all_duties(
+    command_bus: CommandBusDep,
+) -> list[DutySchema]:
+    """Get all duties"""
+
+    command = GetAllDutiesCommand()
+    result = await command_bus.execute(command)
+
+    if result.status == CommandResultStatus.FAILURE:
+        raise HTTPException(status_code=500, detail=result.error_message)
+
+    return cast(list[DutySchema], result.data) if result.data else []
+
+
+@router.get("/current-duty/", response_model=DutySchema | None)
+async def get_current_duty(
+    command_bus: CommandBusDep,
+) -> DutySchema | None:
+    """Get current duty"""
+    command = GetCurrentDutyCommand()
+    result = await command_bus.execute(command)
+
+    if result.status == CommandResultStatus.FAILURE:
+        raise HTTPException(status_code=500, detail=result.error_message)
+
+    return cast(DutySchema, result.data) if result.data else None
+
+
+@router.post("/put-on-duty/", response_model=DutySchema)
+async def create_duty(
+    duty_data: DutySchema,
+    command_bus: CommandBusDep,
+    current_user: dict[str, Any] = Depends(get_current_user),
+) -> DutySchema:
+    """Create new duty"""
+    command = CreateDutyCommand(
+        id=duty_data.id,
+        devops_id=duty_data.devops_id,
+        start_time=duty_data.start_time,
+        end_time=duty_data.end_time,
+    )
+
+    result = await command_bus.execute(command)
+
+    if result.status == CommandResultStatus.VALIDATION_ERROR:
+        raise HTTPException(status_code=400, detail=result.validation_errors)
+
+    if result.status == CommandResultStatus.FAILURE:
+        raise HTTPException(status_code=500, detail=result.error_message)
+
+    if not result.data:
+        raise HTTPException(status_code=500, detail="Failed to create duty")
+
+    return cast(DutySchema, result.data)
+
+
+========== to_the_hell/oncallhub/api/routers/incidents.py ==========
+
+from typing import cast
+
+from fastapi import APIRouter, HTTPException
+
+from to_the_hell.oncallhub.api.deps import CommandBusDep
+from to_the_hell.oncallhub.api.schemas.incident import IncidentSchema
+from to_the_hell.oncallhub.domain.commands import (
+    CommandResultStatus,
+    GetAllIncidentsCommand,
+)
+
+router = APIRouter()
+
+
+@router.get("/incidents", response_model=list[IncidentSchema])
+async def get_all_incidents(
+    command_bus: CommandBusDep,
+    limit: int = 100,
+    offset: int = 0,
+    status: str | None = None,
+) -> list[IncidentSchema]:
+    """
+    Get all incidents in history
+    """
+    command = GetAllIncidentsCommand(limit=limit, offset=offset, status=status)
+
+    result = await command_bus.execute(command)
+
+    if result.status == CommandResultStatus.FAILURE:
+        raise HTTPException(status_code=500, detail=result.error_message)
+
+    return cast(list[IncidentSchema], result.data) if result.data else []
+
+
+========== to_the_hell/oncallhub/api/schemas/__init__.py ==========
+
+from .duty import DutySchema
+from .incident import IncidentSchema
+from .user import UserSchema
+
+__all__ = ["DutySchema", "IncidentSchema", "UserSchema"]
+
+
+========== to_the_hell/oncallhub/api/schemas/devops.py ==========
+
+from pydantic import BaseModel
+
+
+class DevopsSchema(BaseModel):
+    id: int
+    name: str
+    telegram_username: str
+
+
+========== to_the_hell/oncallhub/api/schemas/duty.py ==========
+
+from datetime import datetime
+
+from pydantic import BaseModel
+
+
+class DutySchema(BaseModel):
+    devops_id: int
+    start_time: datetime
+    end_time: datetime
+    status: bool
+    id: int
+    created_at: datetime | None = None
+
+
+========== to_the_hell/oncallhub/api/schemas/incident.py ==========
+
+from pydantic import BaseModel
+
+from to_the_hell.oncallhub.domain.value_objects.incident_priority import (
+    IncidentPriority,
+)
+
+from .duty import DutySchema
+
+
+class IncidentSchema(BaseModel):
+    id: int
+    description: str
+    incident_created_at: float
+    status: str
+    incident_assigned_at: float | None
+    priority: IncidentPriority
+    assigned_duty: list[DutySchema] | None
+
+
+========== to_the_hell/oncallhub/api/schemas/user.py ==========
+
+from pydantic import BaseModel
+
+
+class UserSchema(BaseModel):
+    id: int
+    username: str
+    email: str
+    is_active: bool
+
+
+class UserLoginSchema(BaseModel):
+    username: str
+    password: str
+
+
+class TokenPairSchema(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+
+class RefreshTokenSchema(BaseModel):
+    refresh_token: str
+
+
+========== to_the_hell/oncallhub/api/validators/__init__.py ==========
+
+from .time_range_validator import TimeRangeValidator
+
+__all__ = ["TimeRangeValidator"]
+
+
+========== to_the_hell/oncallhub/api/validators/time_range_validator.py ==========
+
+from to_the_hell.oncallhub.api.exceptions import (
+    ValidationDurationError,
+    ValidationError,
+)
+from to_the_hell.oncallhub.domain.value_objects import TimeRange
+
+
+class TimeRangeValidator:
+    """Domain validator for TimeRange value_objects"""
+
+    MIN_HOUR = 0
+    MAX_START_HOUR = 23
+    MAX_END_HOUR = 24
+    MAX_DURATION = 12
+
+    @classmethod
+    def validate_hours(cls, start_hour: int, end_hour: int) -> None:
+        """Validate hour values"""
+        if not (cls.MIN_HOUR <= start_hour <= cls.MAX_START_HOUR):
+            raise ValidationError(
+                f"start hour must be between 0 and 23, got {start_hour}"
+            )
+        if not (cls.MIN_HOUR <= end_hour <= cls.MAX_END_HOUR):
+            raise ValidationError(f"end hour must be between 0 and 23, got {end_hour}")
+
+    @classmethod
+    def validate_duration(cls, time_range: TimeRange) -> None:
+        """Validate duration of duty in hours"""
+        if time_range.duration_hours > cls.MAX_DURATION:
+            raise ValidationDurationError(
+                f"Duty duration cannot exceed {cls.MAX_DURATION} hours, "
+                f"got {time_range.duration_hours:.2f} hours"
+            )
+
+
+========== to_the_hell/oncallhub/core/__init__.py ==========
+
+from .config import settings
+
+__all__ = ["settings"]
+
+
+========== to_the_hell/oncallhub/core/config.py ==========
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):  # type: ignore[misc]
+    """Application settings"""
+
+    # Database
+    DATABASE_HOST: str
+    DATABASE_PORT: int
+    DATABASE_USER: str
+    DATABASE_PASSWORD: str
+    DATABASE_NAME: str
+
+    @property
+    def get_database_url(self) -> str:
+        """Get async database URL for SQLAlchemy"""
+        return (
+            f"postgresql+asyncpg://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}"
+            f"@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
+        )
+
+    DATABASE_ECHO: bool
+
+    # Application
+    APP_NAME: str = "OnCall Hub"
+    DEBUG: bool
+    SECRET_KEY: str
+    API_PREFIX: str = "/api/v1"
+
+    # CELERY
+    CELERY_REDIS_HOST: str
+    CELERY_REDIS_PORT: str
+    CELERY_REDIS_PASSWORD: str
+    CELERY_TASK_SERIALIZER: str = "json"
+    CELERY_RESULT_SERIALIZER: str = "json"
+    CELERY_ACCEPT_CONTENT: list[str] = ["json"]
+    CELERY_TIMEZONE: str = "UTC"
+    CELERY_ENABLE_UTC: bool = True
+    CELERY_TASK_TRACK_STARTED: bool = True
+    CELERY_TASK_TIME_LIMIT: int = 30 * 60
+    CELERY_TASK_SOFT_TIME_LIMIT: int = 25 * 60
+
+    @property
+    def get_redis_url(self) -> str:
+        """Get Celery Redis URL"""
+        if self.CELERY_REDIS_PASSWORD:
+            return f"redis://:{self.CELERY_REDIS_PASSWORD}@{self.CELERY_REDIS_HOST}:{self.CELERY_REDIS_PORT}/0"
+        return f"redis://{self.CELERY_REDIS_HOST}:{self.CELERY_REDIS_PORT}/0"
+
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="ignore"
+    )
+
+
+settings = Settings()
+
+
+========== to_the_hell/oncallhub/domain/__init__.py ==========
+
+
+
+========== to_the_hell/oncallhub/domain/application/dependencies.py ==========
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from to_the_hell.oncallhub.domain.application.handlers import (
+    CreateDutyHandler,
+    GetAllDutiesHandler,
+    GetCurrentDutyHandler,
+)
+from to_the_hell.oncallhub.domain.commands.base import CommandBus
+from to_the_hell.oncallhub.domain.commands.duty_commands import (
+    CreateDutyCommand,
+    GetAllDutiesCommand,
+    GetCurrentDutyCommand,
+)
+from to_the_hell.oncallhub.infra.db.repositories import PostgresDutyRepository
+
+
+async def get_command_bus(session: AsyncSession) -> CommandBus:
+    """
+    Create and configure Command Bus with all handlers
+    for get_commands_bus_dependency
+
+    Do not use this directly with FastAPI Depends()!
+    """
+    command_bus = CommandBus()
+
+    duty_repo = PostgresDutyRepository(session)
+
+    command_bus.register_handler(CreateDutyCommand, CreateDutyHandler(duty_repo))
+    command_bus.register_handler(
+        GetCurrentDutyCommand, GetCurrentDutyHandler(duty_repo)
+    )
+    command_bus.register_handler(GetAllDutiesCommand, GetAllDutiesHandler(duty_repo))
+
+    return command_bus
+
+
+========== to_the_hell/oncallhub/domain/application/handlers/__init__.py ==========
+
+from .duty_handlers import CreateDutyHandler, GetAllDutiesHandler, GetCurrentDutyHandler
+from .incident_hanler import GetAllIncidentsHandler
+
+__all__ = [
+    "CreateDutyHandler",
+    "GetAllDutiesHandler",
+    "GetAllIncidentsHandler",
+    "GetCurrentDutyHandler",
+]
+
+
+========== to_the_hell/oncallhub/domain/application/handlers/duty_handlers.py ==========
+
+from datetime import UTC, datetime
+
+from to_the_hell.oncallhub.api.schemas import DutySchema
+from to_the_hell.oncallhub.domain.commands import (
+    CommandHandler,
+    CommandResult,
+)
+from to_the_hell.oncallhub.domain.commands.base import Command
+from to_the_hell.oncallhub.domain.commands.duty_commands import (
+    CreateDutyCommand,
+    GetAllDutiesCommand,
+    GetCurrentDutyCommand,
+)
+from to_the_hell.oncallhub.domain.entities import Duty
+from to_the_hell.oncallhub.domain.repositories import BaseDutyRepository
+
+
+class CreateDutyHandler(CommandHandler[DutySchema]):
+    def __init__(self, repository: BaseDutyRepository):
+        self.repository = repository
+
+    async def handle(self, command: Command) -> CommandResult[DutySchema]:
+        if not isinstance(command, CreateDutyCommand):
+            return CommandResult.failure("Invalid command type")
+
+        if command.end_time <= command.start_time:
+            return CommandResult.validation_error(
+                {"time_range": ["End time must be after start time"]}
+            )
+
+        try:
+            duty = Duty(
+                id=command.id,
+                devops_id=command.devops_id,
+                start_time=command.start_time,
+                end_time=command.end_time,
+                status=True,
+                created_at=datetime.now(tz=UTC),
+            )
+
+            created_duty = await self.repository.create(duty)
+
+            duty_schema = DutySchema(
+                id=created_duty.id,
+                devops_id=created_duty.devops_id,
+                start_time=created_duty.start_time,
+                end_time=created_duty.end_time,
+                status=created_duty.status,
+                created_at=created_duty.created_at,
+            )
+
+            return CommandResult.success(duty_schema)
+
+        except Exception as e:
+            return CommandResult.failure(f"Failed to create duty: {e!s}")
+
+    def can_handle(self, command: Command) -> bool:
+        return isinstance(command, CreateDutyCommand)
+
+
+class GetCurrentDutyHandler(CommandHandler[DutySchema | None]):
+    def __init__(self, repository: BaseDutyRepository):
+        self.repository = repository
+
+    async def handle(self, command: Command) -> CommandResult[DutySchema | None]:
+        if not isinstance(command, GetCurrentDutyCommand):
+            return CommandResult.failure("Invalid command type")
+
+        try:
+            duty = await self.repository.get_current_duty()
+
+            if not duty:
+                return CommandResult.success(None)
+
+            duty_schema = DutySchema(
+                id=duty.id,
+                devops_id=duty.devops_id,
+                start_time=duty.start_time,
+                end_time=duty.end_time,
+                status=duty.status,
+                created_at=duty.created_at,
+            )
+
+            return CommandResult.success(duty_schema)
+
+        except Exception as e:
+            return CommandResult.failure(f"Failed to get current duty: {e!s}")
+
+    def can_handle(self, command: Command) -> bool:
+        return isinstance(command, GetCurrentDutyCommand)
+
+
+class GetAllDutiesHandler(CommandHandler[list[DutySchema]]):
+    def __init__(self, repository: BaseDutyRepository):
+        self.repository = repository
+
+    async def handle(self, command: Command) -> CommandResult[list[DutySchema]]:
+        if not isinstance(command, GetAllDutiesCommand):
+            return CommandResult.failure("Invalid command type")
+
+        try:
+            duties = await self.repository.get_all_duties()
+
+            duty_schemas = [
+                DutySchema(
+                    id=duty.id,
+                    devops_id=duty.devops_id,
+                    start_time=duty.start_time,
+                    end_time=duty.end_time,
+                    status=duty.status,
+                    created_at=duty.created_at,
+                )
+                for duty in duties
+            ]
+
+            return CommandResult.success(duty_schemas)
+
+        except Exception as e:
+            return CommandResult.failure(f"Failed to get all duties: {e!s}")
+
+    def can_handle(self, command: Command) -> bool:
+        return isinstance(command, GetAllDutiesCommand)
+
+
+========== to_the_hell/oncallhub/domain/application/handlers/incident_hanler.py ==========
+
+from typing import TYPE_CHECKING
+
+from to_the_hell.oncallhub.api.schemas.incident import IncidentSchema
+from to_the_hell.oncallhub.domain.commands.base import (
+    Command,
+    CommandHandler,
+    CommandResult,
+)
+from to_the_hell.oncallhub.domain.commands.incident_commands import (
+    GetAllIncidentsCommand,
+)
+from to_the_hell.oncallhub.domain.repositories import BaseIncidentRepository
+from to_the_hell.oncallhub.domain.value_objects.incident_priority import (
+    IncidentPriority,
+)
+
+if TYPE_CHECKING:
+    pass
+
+
+class GetAllIncidentsHandler(CommandHandler[list[IncidentSchema]]):
+    def __init__(self, repository: BaseIncidentRepository):
+        self.repository = repository
+
+    async def handle(self, command: Command) -> CommandResult[list[IncidentSchema]]:
+        if not isinstance(command, GetAllIncidentsCommand):
+            return CommandResult.failure("Invalid command type")
+
+        try:
+            incidents = await self.repository.get_all_incidents(
+                limit=command.limit,
+                offset=command.offset,
+                status=command.status,
+                assigned_to=command.assigned_to,
+            )
+
+            if not incidents:
+                return CommandResult.success([])
+
+            incident_schemas = [
+                IncidentSchema(
+                    id=incident.id,
+                    description=incident.description,
+                    incident_created_at=incident.created_at.timestamp(),
+                    incident_assigned_at=incident.assigned_at.timestamp()
+                    if incident.assigned_at
+                    else None,
+                    status=incident.status,
+                    priority=IncidentPriority(incident.priority.value),
+                    assigned_duty=incident.incident_duties,
+                )
+                for incident in incidents
+                if incident.id
+            ]
+
+            return CommandResult.success(incident_schemas)
+
+        except Exception as e:
+            return CommandResult.failure(f"Failed to get incidents: {e!s}")
+
+    def can_handle(self, command: Command) -> bool:
+        return isinstance(command, GetAllIncidentsCommand)
+
+
+========== to_the_hell/oncallhub/domain/commands/__init__.py ==========
+
+from .base import (
+    Command,
+    CommandBus,
+    CommandHandler,
+    CommandResult,
+    CommandResultStatus,
+)
+from .duty_commands import CreateDutyCommand, GetAllDutiesCommand, GetCurrentDutyCommand
+from .incident_commands import GetAllIncidentsCommand
+
+__all__ = [
+    "Command",
+    "CommandBus",
+    "CommandHandler",
+    "CommandResult",
+    "CommandResultStatus",
+    "CreateDutyCommand",
+    "GetAllDutiesCommand",
+    "GetAllIncidentsCommand",
+    "GetCurrentDutyCommand",
+]
+
+
+========== to_the_hell/oncallhub/domain/commands/base.py ==========
+
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from enum import Enum
+from typing import Any, Generic, TypeVar
+
+T = TypeVar("T")
+
+
+class CommandResultStatus(Enum):
+    SUCCESS = "success"
+    FAILURE = "failure"
+    VALIDATION_ERROR = "validation_error"
+
+
+@dataclass
+class CommandResult(Generic[T]):
+    status: CommandResultStatus
+    data: T | None = None
+    error_message: str | None = None
+    validation_errors: dict[str, list[str]] | None = None
+
+    @classmethod
+    def success(cls, data: T) -> "CommandResult[T]":
+        return cls(status=CommandResultStatus.SUCCESS, data=data)
+
+    @classmethod
+    def failure(cls, error_message: str) -> "CommandResult[T]":
+        return cls(status=CommandResultStatus.FAILURE, error_message=error_message)
+
+    @classmethod
+    def validation_error(
+        cls, validation_errors: dict[str, list[str]]
+    ) -> "CommandResult[T]":
+        return cls(
+            status=CommandResultStatus.VALIDATION_ERROR,
+            validation_errors=validation_errors,
+        )
+
+
+class Command(ABC):
+    @abstractmethod
+    def get_command_type(self) -> str:
+        """Return command type identifier"""
+        pass
+
+
+class CommandHandler(ABC, Generic[T]):
+    @abstractmethod
+    async def handle(self, command: Command) -> CommandResult[T]:
+        pass
+
+    @abstractmethod
+    def can_handle(self, command: Command) -> bool:
+        pass
+
+
+class CommandBus:
+    def __init__(self) -> None:
+        self._handlers: dict[type[Command], CommandHandler[Any]] = {}
+
+    def register_handler(
+        self,
+        command_type: type[Command],
+        handler: CommandHandler[Any],
+    ) -> None:
+        self._handlers[command_type] = handler
+
+    async def execute(self, command: Command) -> CommandResult[Any]:
+        command_type = type(command)
+
+        if command_type not in self._handlers:
+            raise ValueError(f"Handler for command {command_type.__name__} not found")
+
+        handler = self._handlers[command_type]
+        return await handler.handle(command)
+
+
+========== to_the_hell/oncallhub/domain/commands/duty_commands.py ==========
+
+from dataclasses import dataclass
+from datetime import datetime
+
+from to_the_hell.oncallhub.domain.commands.base import Command
+
+
+@dataclass
+class CreateDutyCommand(Command):
+    """
+    Command to create a new duty
+    """
+
+    id: int
+    devops_id: int
+    start_time: datetime
+    end_time: datetime
+
+    def get_command_type(self) -> str:
+        """Get command type identifier"""
+        return "create_duty"
+
+
+@dataclass
+class GetCurrentDutyCommand(Command):
+    """
+    Command to get current active duty
+    """
+
+    def get_command_type(self) -> str:
+        """Get command type identifier"""
+        return "get_current_duty"
+
+
+@dataclass
+class GetAllDutiesCommand(Command):
+    """
+    Command to get all duties with pagination
+    """
+
+    limit: int | None = None
+    offset: int | None = None
+
+    def get_command_type(self) -> str:
+        """Get command type identifier"""
+        return "get_all_duties"
+
+
+========== to_the_hell/oncallhub/domain/commands/incident_commands.py ==========
+
+from dataclasses import dataclass
+
+from to_the_hell.oncallhub.domain.commands.base import Command
+
+
+@dataclass
+class GetAllIncidentsCommand(Command):
+    """
+    Command to get all incidents with filtering
+    """
+
+    limit: int | None = None
+    offset: int | None = None
+    status: str | None = None
+    assigned_to: int | None = None
+
+    def get_command_type(self) -> str:
+        """Get command type identifier"""
+        return "get_all_incidents"
+
+
+========== to_the_hell/oncallhub/domain/entities/__init__.py ==========
+
+from .devops_entity import Devops
+from .duty_entity import Duty
+from .incident_entity import Incident
+from .user_entity import User
+
+__all__ = ["Devops", "Duty", "Incident", "User"]
+
+
+========== to_the_hell/oncallhub/domain/entities/devops_entity.py ==========
+
+from dataclasses import dataclass
+
+
+@dataclass
+class Devops:
+    """
+    DevOps user domain entity
+    """
+
+    id: int
+    name: str
+    telegram_chat_id: str
+    email: str
+    phone: str
+
+
+========== to_the_hell/oncallhub/domain/entities/duty_entity.py ==========
+
+from dataclasses import dataclass
+from datetime import datetime
+
+from to_the_hell.oncallhub.domain.value_objects import TimeRange
+
+
+@dataclass
+class Duty:
+    """
+    Domain entity for duty
+    """
+
+    devops_id: int
+    start_time: datetime
+    end_time: datetime
+    status: bool
+    id: int
+    created_at: datetime | None = None
+
+    @property
+    def time_range(self) -> TimeRange:
+        """Get time range of duty"""
+        return TimeRange(start=self.start_time, end=self.end_time)
+
+    @classmethod
+    def create_from_time_range(
+        cls,
+        devops_id: int,
+        time_range: TimeRange,
+        status: bool,
+        id: int,
+        created_at: datetime | None = None,
+    ) -> "Duty":
+        """Create duty from time range"""
+        return cls(
+            devops_id=devops_id,
+            start_time=time_range.start,
+            end_time=time_range.end,
+            status=status,
+            id=id,
+            created_at=created_at,
+        )
+
+
+========== to_the_hell/oncallhub/domain/entities/incident_entity.py ==========
+
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any
+
+from to_the_hell.oncallhub.domain.value_objects import DevopsId, IncidentPriority
+
+if TYPE_CHECKING:
+    from to_the_hell.oncallhub.domain.entities.incident_states import IncidentState
+
+
+class Incident:
+    """
+    Domain entity for incident
+    """
+
+    def __init__(
+        self,
+        id: int,
+        title: str,
+        description: str,
+        priority: "IncidentPriority",
+    ):
+        """Initialize incident entity"""
+        self.title: str = title
+        self.description: str = description
+        self.priority: IncidentPriority = priority
+        self.created_at: datetime = datetime.now(tz=UTC)
+
+        from to_the_hell.oncallhub.domain.entities.incident_states import (
+            NewIncidentState,
+        )
+
+        self._state: IncidentState = NewIncidentState()
+
+        self.id: int | None = None
+        self.assigned_id: int | None = None
+        self.assigned_at: datetime | None = None
+        self.updated_at: datetime | None = None
+        self.comments: list[IncidentComment] = []
+
+        self.assigned_to: DevopsId | None = None
+        self.started_work_at: datetime | None = None
+        self.resolved_at: datetime | None = None
+        self.closed_at: datetime | None = None
+
+        self.incident_assigned: Any | None = None
+        self.incident_duties: list[Any] | None = None
+
+    def assign_to_devops(self, devops_id: DevopsId) -> None:
+        """Assign incident to devops user"""
+        self.assigned_id = devops_id.value
+        self.assigned_to = devops_id
+        self.assigned_at = datetime.now(tz=UTC)
+        self.updated_at = datetime.now(tz=UTC)
+
+    def add_comment(self, text: str, user_id: int) -> None:
+        """Add comment to incident"""
+        comment = IncidentComment(
+            text=text, user_id=user_id, created_at=datetime.now(tz=UTC)
+        )
+        self.comments.append(comment)
+        self.updated_at = datetime.now(tz=UTC)
+
+    def set_state(self, state: "IncidentState") -> None:
+        """Set new state for incident"""
+        self._state = state
+        self.updated_at = datetime.now(tz=UTC)
+
+    def get_state(self) -> "IncidentState":
+        """Get current state of incident"""
+        return self._state
+
+    def is_active(self) -> bool:
+        """Check if incident is active"""
+        from to_the_hell.oncallhub.domain.entities.incident_states import (
+            ClosedIncidentState,
+            ResolvedIncidentState,
+        )
+
+        return not isinstance(
+            self._state, (ClosedIncidentState | ResolvedIncidentState)
+        )
+
+    @property
+    def status(self) -> str:
+        """Get current status of incident"""
+        return self._state.get_status().value
+
+
+class IncidentComment:
+    """
+    Comment for incident
+    """
+
+    def __init__(self, text: str, user_id: int, created_at: datetime):
+        """Initialize comment with int user_id"""
+        self.text = text
+        self.user_id = user_id
+        self.created_at = created_at
+
+
+========== to_the_hell/oncallhub/domain/entities/incident_states/__init__.py ==========
+
+from .assigned import AssignedIncidentState
+from .base_state import IncidentState
+from .closed import ClosedIncidentState
+from .in_progress import InProgressIncidentState
+from .incident_status import IncidentStatus
+from .new import NewIncidentState
+from .resolved import ResolvedIncidentState
+
+__all__ = [
+    "AssignedIncidentState",
+    "ClosedIncidentState",
+    "InProgressIncidentState",
+    "IncidentState",
+    "IncidentStatus",
+    "NewIncidentState",
+    "ResolvedIncidentState",
+]
+
+
+========== to_the_hell/oncallhub/domain/entities/incident_states/assigned.py ==========
+
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any
+
+from .base_state import IncidentState
+from .incident_status import IncidentStatus
+
+if TYPE_CHECKING:
+    from to_the_hell.oncallhub.domain.entities import Incident
+    from to_the_hell.oncallhub.domain.value_objects import DevopsId
+
+
+class AssignedIncidentState(IncidentState):
+    """State of assigned incident"""
+
+    def assign_to_devops(self, incident: "Incident", devops_id: "DevopsId") -> bool:
+        incident.assigned_to = devops_id
+        incident.assigned_at = datetime.now(tz=UTC)
+        incident.set_state(AssignedIncidentState())
+        return True
+
+    def start_work(self, incident: "Incident") -> bool:
+        from .in_progress import InProgressIncidentState
+
+        incident.started_work_at = datetime.now(tz=UTC)
+        incident.set_state(InProgressIncidentState())
+        return True
+
+    def resolve(self, incident: "Incident", resolution: Any | None = None) -> bool:
+        return False
+
+    def close(self, incident: "Incident") -> bool:
+        return False
+
+    def get_status(self) -> IncidentStatus:
+        return IncidentStatus.ASSIGNED
+
+
+========== to_the_hell/oncallhub/domain/entities/incident_states/base_state.py ==========
+
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, Any
+
+from to_the_hell.oncallhub.domain.value_objects import DevopsId
+
+if TYPE_CHECKING:
+    from to_the_hell.oncallhub.domain.entities import Incident
+    from to_the_hell.oncallhub.domain.entities.incident_states import (
+        IncidentStatus,
+    )
+
+
+class IncidentState(ABC):
+    """Abstract Incident state"""
+
+    @abstractmethod
+    def assign_to_devops(self, incident: "Incident", devops_id: DevopsId) -> bool:
+        pass
+
+    @abstractmethod
+    def start_work(self, incident: "Incident") -> bool:
+        pass
+
+    @abstractmethod
+    def resolve(self, incident: "Incident", resolution: Any = None) -> bool:
+        pass
+
+    @abstractmethod
+    def close(self, incident: "Incident") -> bool:
+        pass
+
+    @abstractmethod
+    def get_status(self) -> "IncidentStatus":
+        pass
+
+
+========== to_the_hell/oncallhub/domain/entities/incident_states/closed.py ==========
+
+from typing import TYPE_CHECKING, Any
+
+from .base_state import IncidentState
+from .incident_status import IncidentStatus
+
+if TYPE_CHECKING:
+    from to_the_hell.oncallhub.domain.entities import Incident
+    from to_the_hell.oncallhub.domain.value_objects import DevopsId
+
+
+class ClosedIncidentState(IncidentState):
+    """State of closed incident"""
+
+    def assign_to_devops(self, incident: "Incident", devops_id: "DevopsId") -> bool:
+        return False
+
+    def start_work(self, incident: "Incident") -> bool:
+        return False
+
+    def resolve(self, incident: "Incident", resolution: Any | None = None) -> bool:
+        return False
+
+    def close(self, incident: "Incident") -> bool:
+        return False
+
+    def get_status(self) -> IncidentStatus:
+        return IncidentStatus.CLOSED
+
+
+========== to_the_hell/oncallhub/domain/entities/incident_states/in_progress.py ==========
+
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any
+
+from .base_state import IncidentState
+from .incident_status import IncidentStatus
+
+if TYPE_CHECKING:
+    from to_the_hell.oncallhub.domain.entities import Incident
+    from to_the_hell.oncallhub.domain.value_objects import DevopsId
+
+
+class InProgressIncidentState(IncidentState):
+    """State of in progress incident"""
+
+    def assign_to_devops(self, incident: "Incident", devops_id: "DevopsId") -> bool:
+        from .assigned import AssignedIncidentState
+
+        incident.assigned_to = devops_id
+        incident.assigned_at = datetime.now(tz=UTC)
+        incident.started_work_at = None
+        incident.set_state(AssignedIncidentState())
+        return True
+
+    def start_work(self, incident: "Incident") -> bool:
+        return False
+
+    def resolve(self, incident: "Incident", resolution: Any | None = None) -> bool:
+        from .resolved import ResolvedIncidentState
+
+        incident.resolved_at = datetime.now(tz=UTC)
+        incident.set_state(ResolvedIncidentState())
+        return True
+
+    def close(self, incident: "Incident") -> bool:
+        return False
+
+    def get_status(self) -> IncidentStatus:
+        return IncidentStatus.IN_PROGRESS
+
+
+========== to_the_hell/oncallhub/domain/entities/incident_states/incident_status.py ==========
+
+from enum import Enum
+
+
+class IncidentStatus(Enum):
+    """Names all statuses"""
+
+    NEW = "new"
+    ASSIGNED = "assigned"
+    IN_PROGRESS = "in_progress"
+    RESOLVED = "resolved"
+    CLOSED = "closed"
+
+
+========== to_the_hell/oncallhub/domain/entities/incident_states/new.py ==========
+
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any
+
+from .base_state import IncidentState
+from .incident_status import IncidentStatus
+
+if TYPE_CHECKING:
+    from to_the_hell.oncallhub.domain.entities import Incident
+    from to_the_hell.oncallhub.domain.value_objects import DevopsId
+
+
+class NewIncidentState(IncidentState):
+    """State of new incident"""
+
+    def assign_to_devops(self, incident: "Incident", devops_id: "DevopsId") -> bool:
+        from .assigned import AssignedIncidentState
+
+        incident.assigned_to = devops_id
+        incident.assigned_at = datetime.now(tz=UTC)
+        incident.set_state(AssignedIncidentState())
+        return True
+
+    def start_work(self, incident: "Incident") -> bool:
+        return False
+
+    def resolve(self, incident: "Incident", resolution: Any | None = None) -> bool:
+        return False
+
+    def close(self, incident: "Incident") -> bool:
+        return False
+
+    def get_status(self) -> IncidentStatus:
+        return IncidentStatus.NEW
+
+
+========== to_the_hell/oncallhub/domain/entities/incident_states/resolved.py ==========
+
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any
+
+from .base_state import IncidentState
+from .incident_status import IncidentStatus
+
+if TYPE_CHECKING:
+    from to_the_hell.oncallhub.domain.entities import Incident
+    from to_the_hell.oncallhub.domain.value_objects import DevopsId
+
+
+class ResolvedIncidentState(IncidentState):
+    """State of resolved incident"""
+
+    def assign_to_devops(self, incident: "Incident", devops_id: "DevopsId") -> bool:
+        from .assigned import AssignedIncidentState
+
+        incident.assigned_to = devops_id
+        incident.assigned_at = datetime.now(tz=UTC)
+        incident.resolved_at = None
+        incident.set_state(AssignedIncidentState())
+        return True
+
+    def start_work(self, incident: "Incident") -> bool:
+        from .in_progress import InProgressIncidentState
+
+        incident.resolved_at = None
+        incident.started_work_at = datetime.now(tz=UTC)
+        incident.set_state(InProgressIncidentState())
+        return True
+
+    def resolve(self, incident: "Incident", resolution: Any | None = None) -> bool:
+        return False
+
+    def close(self, incident: "Incident") -> bool:
+        from .closed import ClosedIncidentState
+
+        incident.closed_at = datetime.now(tz=UTC)
+        incident.set_state(ClosedIncidentState())
+        return True
+
+    def get_status(self) -> IncidentStatus:
+        return IncidentStatus.RESOLVED
+
+
+========== to_the_hell/oncallhub/domain/entities/user_entity.py ==========
+
+from dataclasses import dataclass
+from datetime import datetime
+
+
+@dataclass
+class User:
+    """
+    User domain entity
+    """
+
+    username: str
+    email: str
+    hashed_password: str
+    id: int | None = None
+    created_at: datetime | None = None
+    is_active: bool = True
+
+
+========== to_the_hell/oncallhub/domain/events/__init__.py ==========
+
+from .incidents_events import IncidentAssigned, IncidentCreated
+
+__all__ = ["IncidentAssigned", "IncidentCreated"]
+
+
+========== to_the_hell/oncallhub/domain/events/incidents_events.py ==========
+
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any
+
+
+class IncidentStatus:
+    """Base class for incident status"""
+
+    pass
+
+
+@dataclass
+class IncidentCreated(IncidentStatus):
+    """Event for incident creation"""
+
+    about_troubles: str
+    date: datetime
+
+    def __str__(self) -> str:
+        return f"In {self.date} was found incident: {self.about_troubles}"
+
+
+@dataclass
+class IncidentAssigned(IncidentStatus):
+    """Represents an incident assignment event"""
+
+    assignee_comment: str
+    assigned_at: datetime
+
+    def __str__(self) -> str:
+        """Human-readable representation"""
+        return f"Incident assigned at {self.assigned_at.isoformat()} | Comment: {self.assignee_comment}"
+
+    def to_timestamp(self) -> float:
+        """Convert to Unix timestamp"""
+        return self.assigned_at.timestamp()
+
+    def to_iso_string(self) -> str:
+        """Convert to ISO 8601 string"""
+        return self.assigned_at.isoformat()
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize to dictionary for API responses"""
+        return {
+            "event_type": "incident_assigned",
+            "assignee_comment": self.assignee_comment,
+            "assigned_at": self.assigned_at.isoformat(),
+            "timestamp": self.assigned_at.timestamp(),
+        }
+
+
+========== to_the_hell/oncallhub/domain/repositories/__init__.py ==========
+
+from .base_repositories import (
+    BaseDevopsRepository,
+    BaseDutyRepository,
+    BaseIncidentRepository,
+)
+
+__all__ = ["BaseDevopsRepository", "BaseDutyRepository", "BaseIncidentRepository"]
+
+
+========== to_the_hell/oncallhub/domain/repositories/base_repositories.py ==========
+
+from abc import ABC, abstractmethod
+
+from to_the_hell.oncallhub.domain.entities import Devops, Duty, Incident
+
+
+class BaseDutyRepository(ABC):
+    """
+    Abstract repository for Duty
+    """
+
+    @abstractmethod
+    async def create(self, duty: Duty) -> Duty:
+        """Create new duty"""
+        pass
+
+    @abstractmethod
+    async def get_current_duty(self) -> Duty | None:
+        """Get currently active duty"""
+        pass
+
+    @abstractmethod
+    async def get_all_duties(self) -> list[Duty]:
+        """Get all duties"""
+        pass
+
+
+class BaseDevopsRepository(ABC):
+    """
+    Abstract repository for Devops
+    """
+
+    @abstractmethod
+    async def create(self, devops: Devops) -> Devops:
+        """Create new devops user"""
+        pass
+
+
+class BaseIncidentRepository(ABC):
+    """
+    Abstract repository for Incident
+    """
+
+    @abstractmethod
+    async def create(self, incident: Incident) -> Incident:
+        """Create new incident"""
+        pass
+
+    @abstractmethod
+    async def get_all_incidents(
+        self,
+        limit: int | None = None,
+        offset: int | None = None,
+        status: str | None = None,
+        assigned_to: int | None = None,
+    ) -> list[Incident]:
+        """Get all incidents with optional filtering"""
+        pass
+
+
+========== to_the_hell/oncallhub/domain/repositories/user_repository.py ==========
+
+from abc import ABC, abstractmethod
+
+from to_the_hell.oncallhub.domain.entities import User
+
+
+class BaseUserRepository(ABC):
+    """
+    Abstract repository for User
+    """
+
+    @abstractmethod
+    async def get_by_id(self, user_id: int) -> User | None:
+        """Get user by ID"""
+        pass
+
+
+========== to_the_hell/oncallhub/domain/services/__init__.py ==========
+
+from .duty_service import assign_duty
+
+__all__ = [
+    "assign_duty",
+]
+
+
+========== to_the_hell/oncallhub/domain/services/auth_service.py ==========
+
+from random import randint
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
+from typing import Any
+
+import jwt
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+keys_dir = Path(__file__).parent.parent.parent.parent.parent / "keys"
+PRIVATE_KEY = (keys_dir / "private.pem").read_bytes()
+PUBLIC_KEY = (keys_dir / "public.pem").read_bytes()
+
+REVOKED_TOKENS = set()
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Check password"""
+    return bool(pwd_context.verify(plain_password, hashed_password))
+
+
+def get_password_hash(password: str) -> str:
+    """Hash password"""
+    return str(pwd_context.hash(password))
+
+
+def create_token_pair(user_id: int, username: str) -> tuple[str, str]:
+    """
+    Create access and refresh token when login
+    """
+    session_id = str(uuid.randint(0, 10000))
+
+    access_payload = {
+        "sub": str(user_id),
+        "username": username,
+        "session_id": session_id,
+        "type": "access",
+        "exp": datetime.now(UTC) + timedelta(minutes=15),
+        "iat": datetime.now(UTC),
+    }
+
+    refresh_payload = {
+        "sub": str(user_id),
+        "session_id": session_id,
+        "type": "refresh",
+        "exp": datetime.now(UTC) + timedelta(days=7),
+        "iat": datetime.now(UTC),
+    }
+
+    access_token = jwt.encode(access_payload, PRIVATE_KEY, algorithm="RS256")
+    refresh_token = jwt.encode(refresh_payload, PRIVATE_KEY, algorithm="RS256")
+
+    return (access_token, refresh_token)
+
+
+def verify_token(token: str) -> dict[str, Any] | None:
+    """
+    Check token. It may all services
+    """
+    try:
+        payload = jwt.decode(token, PUBLIC_KEY, algorithms=["RS256"])
+
+        if payload.get("type") != "access":
+            return None
+
+        if token in REVOKED_TOKENS:
+            return None
+
+        return dict(payload)
+
+    except jwt.ExpiredSignatureError:
+        return None
+
+    except jwt.InvalidTokenError:
+        return None
+
+
+def refresh_access_token(refresh_token: str) -> str | None:
+    """
+    Refresh access
+    """
+    try:
+        payload = jwt.decode(refresh_token, PUBLIC_KEY, algorithms=["RS256"])
+
+        if payload.get("type") != "refresh":
+            return None
+
+        if refresh_token in REVOKED_TOKENS:
+            return None
+
+        new_access_payload = {
+            "sub": payload["sub"],
+            "username": "from_db",
+            "session_id": payload["session_id"],
+            "type": "access",
+            "exp": datetime.now(UTC) + timedelta(minutes=15),
+            "iat": datetime.now(UTC),
+        }
+
+        return str(jwt.encode(new_access_payload, PRIVATE_KEY, algorithm="RS256"))
+
+    except jwt.InvalidTokenError:
+        return None
+
+
+def logout(refresh_token: str) -> None:
+    """
+    Logout - revoke refresh
+    """
+    REVOKED_TOKENS.add(refresh_token)
+
+
+========== to_the_hell/oncallhub/domain/services/devops_service.py ==========
+
+
+
+========== to_the_hell/oncallhub/domain/services/duty_service.py ==========
+
+from to_the_hell.oncallhub.domain.entities import Devops
+from to_the_hell.oncallhub.domain.value_objects import TimeRange
+
+MIN_DUTY_HOURS = 1
+MAX_DUTY_HOURS = 24
+
+
+def assign_duty(devops: Devops, time_range: TimeRange) -> str:
+    """
+    Assign duty to devops
+
+    Args:
+        devops: devops for duty
+        time_range: time range of duty
+
+    Returns:
+
+    """
+    return f"Duty assigned on {time_range} from devops {devops.name}"
+
+
+def validate_duty_assignment(devops: Devops, time_range: TimeRange) -> bool:
+    """
+    Valisate duty assigment
+    """
+    if time_range.duration_hours < MIN_DUTY_HOURS:
+        raise ValueError(f"Duty must be at least {MIN_DUTY_HOURS} hour long")
+
+    if time_range.duration_hours > MAX_DUTY_HOURS:
+        raise ValueError(f"Duty cannot exceed {MAX_DUTY_HOURS} hours")
+
+    return True
+
+
+========== to_the_hell/oncallhub/domain/services/incident_service.py ==========
+
+from datetime import UTC, datetime
+
+from to_the_hell.oncallhub.domain.entities import Incident
+from to_the_hell.oncallhub.domain.events.incidents_events import (
+    IncidentAssigned,
+)
+
+MESSAGE_INCIDENT_ASSIGNED = "incident is assigned"
+MESSAGE_INCIDENT_IN_WORK = "incident in work"
+MESSAGE_INCIDENT_CREATED = "incident is created, waiting assign of user"
+
+
+def check_status_of_incident(incident: Incident) -> str:
+    """Check status of incident"""
+    if hasattr(incident, "incident_assigned") and incident.incident_assigned:
+        return MESSAGE_INCIDENT_ASSIGNED
+
+    if hasattr(incident, "assigned_duty") and incident.assigned_duty:
+        return MESSAGE_INCIDENT_IN_WORK
+
+    if hasattr(incident, "is_active") and incident.is_active():
+        return MESSAGE_INCIDENT_IN_WORK
+
+    return MESSAGE_INCIDENT_CREATED
+
+
+def close_incident(incident: Incident, comment_of_user: str = "") -> str:
+    """Close incident with comment"""
+    if hasattr(incident, "is_active") and incident.is_active():
+        return "it is yet active"
+
+    if hasattr(incident, "incident_assigned"):
+        incident.incident_assigned = IncidentAssigned(
+            comment_of_user, datetime.now(tz=UTC)
+        )
+
+    return MESSAGE_INCIDENT_ASSIGNED
+
+
+========== to_the_hell/oncallhub/domain/services/notification/__init__.py ==========
+
+
+
+========== to_the_hell/oncallhub/domain/services/notification/base.py ==========
+
+from abc import ABC, abstractmethod
+from typing import Any
+
+
+class NotificationStrategy(ABC):
+    """Abstract strategy for notification"""
+
+    @abstractmethod
+    async def send_notification(
+        self, message: str, recipients: list[str], **kwargs: Any
+    ) -> bool:
+        pass
+
+    @abstractmethod
+    def get_strategy_name(self) -> str:
+        pass
+
+
+========== to_the_hell/oncallhub/domain/services/notification/email.py ==========
+
+
+
+========== to_the_hell/oncallhub/domain/services/notification/service.py ==========
+
+
+
+========== to_the_hell/oncallhub/domain/services/notification/sms.py ==========
+
+
+
+========== to_the_hell/oncallhub/domain/services/notification/telegram.py ==========
+
+
+
+========== to_the_hell/oncallhub/domain/value_objects/__init__.py ==========
+
+from .ids import DevopsId, DutyId, IncidentId
+from .incident_priority import IncidentPriority
+from .time_range import TimeRange
+
+__all__ = ["DevopsId", "DutyId", "IncidentId", "IncidentPriority", "TimeRange"]
+
+
+========== to_the_hell/oncallhub/domain/value_objects/ids.py ==========
+
+from dataclasses import dataclass
+from typing import TypeVar
+
+T = TypeVar("T", bound="EntityId")
+
+
+@dataclass(frozen=True)
+class EntityId:
+    """
+    Base class for all entity IDs
+    """
+
+    value: int
+
+    @classmethod
+    def from_int(cls: type[T], value: int) -> T:
+        """Create EntityId from integer value"""
+        return cls(value=value)
+
+    def __str__(self) -> str:
+        """String representation of ID"""
+        return str(self.value)
+
+
+class DevopsId(EntityId):
+    """ID of devops user"""
+
+    pass
+
+
+class IncidentId(EntityId):
+    """ID of incident"""
+
+    pass
+
+
+class DutyId(EntityId):
+    """ID of duty"""
+
+    pass
+
+
+========== to_the_hell/oncallhub/domain/value_objects/incident_priority.py ==========
+
+from enum import Enum
+from typing import Any
+
+
+class IncidentPriority(Enum):
+    """Приоритеты инцидентов"""
+
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+    def __lt__(self, other: Any) -> bool:
+        if not isinstance(other, IncidentPriority):
+            return NotImplemented
+
+        priority_order = {
+            IncidentPriority.LOW: 1,
+            IncidentPriority.MEDIUM: 2,
+            IncidentPriority.HIGH: 3,
+            IncidentPriority.CRITICAL: 4,
+        }
+
+        return priority_order[self] < priority_order[other]
+
+    def __str__(self) -> str:
+        return self.value
+
+    @classmethod
+    def from_string(cls, value: str) -> "IncidentPriority":
+        """Создать приоритет из строки"""
+        try:
+            return cls(value.lower())
+        except ValueError as e:
+            raise ValueError(f"Invalid priority: {value}") from e
+
+
+========== to_the_hell/oncallhub/domain/value_objects/priority.py ==========
+
+from dataclasses import dataclass
+from enum import Enum
+
+
+class PriorityLevel(Enum):
+    """Priority levels"""
+
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+
+@dataclass(frozen=True)
+class Priority:
+    level: PriorityLevel
+
+    @property
+    def multiplier(self) -> float:
+        """Calculating properties"""
+        return {
+            PriorityLevel.LOW: 1.0,
+            PriorityLevel.MEDIUM: 2.5,
+            PriorityLevel.HIGH: 5.0,
+            PriorityLevel.CRITICAL: 10.0,
+        }[self.level]
+
+    def __str__(self) -> str:
+        return self.level.value
+
+
+========== to_the_hell/oncallhub/domain/value_objects/time_range.py ==========
+
+from dataclasses import dataclass
+from datetime import datetime
+
+
+@dataclass(frozen=True)
+class TimeRange:
+    start: datetime
+    end: datetime
+
+    @property
+    def duration_hours(self) -> float:
+        return (self.end - self.start).total_seconds() / 3600
+
+    def contains(self, timestamp: datetime) -> bool:
+        return self.start <= timestamp <= self.end
+
+    def overlaps_with(self, other: "TimeRange") -> bool:
+        return not (self.end <= other.start or self.start >= other.end)
+
+    def __str__(self) -> str:
+        return f"{self.start.isoformat()} - {self.end.isoformat()}"
+
+
+========== to_the_hell/oncallhub/infra/db/__init__.py ==========
+
+from .models import DevopsORM, DutyORM, IncidentORM
+from .repositories import (
+    PostgresDevopsRepository,
+    PostgresDutyRepository,
+    PostgresIncidentRepository,
+)
+
+__all__ = [
+    "DevopsORM",
+    "DutyORM",
+    "IncidentORM",
+    "PostgresDevopsRepository",
+    "PostgresDutyRepository",
+    "PostgresIncidentRepository",
+]
+
+
+========== to_the_hell/oncallhub/infra/db/models/__init__.py ==========
+
+from .base_orm import AbstractORM
+from .devops_orm import DevopsORM
+from .duty_orm import DutyORM
+from .incident_duty_orm import IncidentDutyORM
+from .incident_orm import IncidentORM
+
+__all__ = ["AbstractORM", "DevopsORM", "DutyORM", "IncidentDutyORM", "IncidentORM"]
+
+
+========== to_the_hell/oncallhub/infra/db/models/base_orm.py ==========
+
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+
+class Base(DeclarativeBase):
+    """
+    Base class for all database models
+    """
+
+    pass
+
+
+class AbstractORM(Base):
+    """
+    Base class for ORM models with integer primary key
+    """
+
+    __abstract__ = True
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+
+
+========== to_the_hell/oncallhub/infra/db/models/devops_orm.py ==========
+
+from typing import TYPE_CHECKING
+
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from .base_orm import AbstractORM
+
+if TYPE_CHECKING:
+    from .duty_orm import DutyORM
+
+
+class DevopsORM(AbstractORM):
+    """
+    DevOps user model
+    """
+
+    __tablename__ = "devopses"
+
+    name: Mapped[str] = mapped_column(nullable=False)
+    telegram_chat_id: Mapped[str] = mapped_column(unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(nullable=False)
+    phone: Mapped[str] = mapped_column(nullable=False)
+
+    duties: Mapped[list["DutyORM"]] = relationship(back_populates="devops")
+
+
+========== to_the_hell/oncallhub/infra/db/models/duty_orm.py ==========
+
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING
+
+from sqlalchemy import DateTime, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from to_the_hell.oncallhub.infra.db.models.base_orm import AbstractORM
+
+if TYPE_CHECKING:
+    from to_the_hell.oncallhub.infra.db.models.devops_orm import DevopsORM
+    from to_the_hell.oncallhub.infra.db.models.incident_duty_orm import IncidentDutyORM
+    from to_the_hell.oncallhub.infra.db.models.incident_orm import IncidentORM
+
+
+class DutyORM(AbstractORM):
+    """
+    Duty schedule ORM model with integer IDs
+    """
+
+    __tablename__ = "duties"
+
+    devops_id: Mapped[int] = mapped_column(ForeignKey("devopses.id"))
+    start_time: Mapped[datetime] = mapped_column(nullable=False)
+    end_time: Mapped[datetime] = mapped_column()
+    status: Mapped[bool] = mapped_column(nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=datetime.now(UTC), nullable=False
+    )
+
+    reminder_24h_sent: Mapped[bool] = mapped_column(default=False, nullable=False)
+    reminder_2h_sent: Mapped[bool] = mapped_column(default=False, nullable=False)
+    reminder_10m_sent: Mapped[bool] = mapped_column(default=False, nullable=False)
+
+    devops: Mapped["DevopsORM"] = relationship(back_populates="duties")
+
+    incident_duties: Mapped[list["IncidentDutyORM"]] = relationship(
+        back_populates="duty", cascade="all, delete-orphan"
+    )
+
+    @property
+    def incidents(self) -> list["IncidentORM"]:
+        """Get all incidents associated with this duty"""
+        return [id_assoc.incident for id_assoc in self.incident_duties]
+
+    user: Mapped["DevopsORM"] = relationship(back_populates="duties")
+
+
+========== to_the_hell/oncallhub/infra/db/models/incident_duty_orm.py ==========
+
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING
+
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from to_the_hell.oncallhub.infra.db.models.base_orm import AbstractORM
+
+if TYPE_CHECKING:
+    from to_the_hell.oncallhub.infra.db.models.duty_orm import DutyORM
+    from to_the_hell.oncallhub.infra.db.models.incident_orm import IncidentORM
+
+
+class IncidentDutyORM(AbstractORM):
+    """
+    Association table between incidents and duties
+    """
+
+    __tablename__ = "incident_duty"
+
+    incident_id: Mapped[int] = mapped_column(ForeignKey("incidents.id"), nullable=False)
+    duty_id: Mapped[int] = mapped_column(ForeignKey("duties.id"), nullable=False)
+    assigned_at: Mapped[datetime] = mapped_column(
+        default=datetime.now(UTC), nullable=False
+    )
+    assigned_by: Mapped[int | None] = mapped_column(
+        ForeignKey("devopses.id"), nullable=True
+    )
+
+    notes: Mapped[str | None] = mapped_column(nullable=True)
+
+    incident: Mapped["IncidentORM"] = relationship(back_populates="incident_duties")
+    duty: Mapped["DutyORM"] = relationship(back_populates="incident_duties")
+
+
+========== to_the_hell/oncallhub/infra/db/models/incident_orm.py ==========
+
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING
+
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from to_the_hell.oncallhub.domain.value_objects.incident_priority import (
+    IncidentPriority,
+)
+from to_the_hell.oncallhub.infra.db.models import AbstractORM
+
+if TYPE_CHECKING:
+    from to_the_hell.oncallhub.infra.db.models import DutyORM, IncidentDutyORM
+
+
+class IncidentORM(AbstractORM):
+    """
+    Incident ORM model with integer primary key
+    """
+
+    __tablename__ = "incidents"
+
+    title: Mapped[str] = mapped_column(nullable=False)
+    description: Mapped[str] = mapped_column(nullable=False)
+    status: Mapped[str] = mapped_column(nullable=False, default="new")
+    priority: Mapped[IncidentPriority] = mapped_column(nullable=False)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.now(UTC))
+    updated_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    resolved_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    closed_at: Mapped[datetime | None] = mapped_column(nullable=True)
+
+    incident_duties: Mapped[list["IncidentDutyORM"]] = relationship(
+        back_populates="incident"
+    )
+
+    @property
+    def current_duties(self) -> list["DutyORM"]:
+        """Get all duties currently assigned to this incident"""
+        return [id_assoc.duty for id_assoc in self.incident_duties]
+
+
+========== to_the_hell/oncallhub/infra/db/repositories/__init__.py ==========
+
+from .repositories import (
+    PostgresDevopsRepository,
+    PostgresDutyRepository,
+    PostgresIncidentRepository,
+)
+
+__all__ = [
+    "PostgresDevopsRepository",
+    "PostgresDutyRepository",
+    "PostgresIncidentRepository",
+]
+
+
+========== to_the_hell/oncallhub/infra/db/repositories/repositories.py ==========
+
+from datetime import UTC, datetime
+
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+from to_the_hell.oncallhub.domain.entities import Devops, Duty, Incident
+from to_the_hell.oncallhub.domain.repositories import (
+    BaseDevopsRepository,
+    BaseDutyRepository,
+    BaseIncidentRepository,
+)
+from to_the_hell.oncallhub.infra.db.models import (
+    DevopsORM,
+    DutyORM,
+    IncidentDutyORM,
+    IncidentORM,
+)
+
+
+class PostgresDutyRepository(BaseDutyRepository):
+    """
+    PostgreSQL repository for Duty operations
+    """
+
+    def __init__(self, session: AsyncSession) -> None:
+        """Initialize repository with async session"""
+        self.session = session
+
+    async def create(self, duty: Duty) -> Duty:
+        """Create new duty in database"""
+        duty_orm = DutyORM()
+        duty_orm.devops_id = duty.devops_id
+        duty_orm.start_time = duty.start_time
+        duty_orm.end_time = duty.end_time
+        duty_orm.status = duty.status
+
+        self.session.add(duty_orm)
+        await self.session.commit()
+        await self.session.refresh(duty_orm)
+
+        return Duty(
+            id=duty_orm.id,
+            devops_id=duty.devops_id,
+            start_time=duty_orm.start_time,
+            end_time=duty_orm.end_time,
+            status=duty_orm.status,
+            created_at=duty_orm.created_at,
+        )
+
+    async def get_current_duty(self) -> Duty | None:
+        """Get current active duty"""
+        stmt = select(DutyORM).where(
+            DutyORM.end_time >= datetime.now(UTC),
+            datetime.now(UTC) >= DutyORM.start_time,
+            DutyORM.status,
+        )
+        res = await self.session.execute(stmt)
+        duty_orm = res.scalar_one_or_none()
+
+        if not duty_orm:
+            return None
+
+        return self._orm_to_entity(duty_orm)
+
+    def _orm_to_entity(self, orm: DutyORM) -> Duty:
+        """Convert ORM model to domain entity"""
+        return Duty(
+            id=orm.id,
+            devops_id=orm.devops_id,
+            start_time=orm.start_time,
+            end_time=orm.end_time,
+            status=orm.status,
+            created_at=orm.created_at,
+        )
+
+    async def get_all_duties(self) -> list[Duty]:
+        """Get all duties from database"""
+        stmt = select(DutyORM)
+        res = await self.session.execute(stmt)
+        duties_orm = res.scalars().all()
+
+        return [self._orm_to_entity(duty_orm) for duty_orm in duties_orm]
+
+
+class PostgresDevopsRepository(BaseDevopsRepository):
+    """
+    PostgreSQL repository for DevOps users
+    """
+
+    def __init__(self, session: AsyncSession) -> None:
+        """Initialize repository with async session"""
+        self.session = session
+
+    async def create(self, devops: Devops) -> Devops:
+        """Create new devops in database"""
+        devops_orm = DevopsORM()
+        devops_orm.name = devops.name
+        devops_orm.telegram_username = devops.telegram_username
+        devops_orm.email = devops.email
+        devops_orm.phone = devops.phone
+
+        self.session.add(devops_orm)
+        await self.session.commit()
+        await self.session.refresh(devops_orm)
+
+        return Devops(
+            id=devops_orm.id,
+            name=devops_orm.name,
+            telegram_username=devops_orm.telegram_username,
+            email=devops_orm.email,
+            phone=devops_orm.phone,
+        )
+
+
+class PostgresIncidentRepository(BaseIncidentRepository):
+    """
+    Repository for Incidents on PostgreSQL
+    """
+
+    def __init__(self, session: AsyncSession) -> None:
+        """Initialize repository with async session"""
+
+        self.session = session
+
+    async def create(self, incident: Incident) -> Incident:
+        """Create new incident in database"""
+        incident_orm = IncidentORM()
+        incident_orm.title = incident.title
+        incident_orm.description = incident.description
+        incident_orm.status = incident.status
+        incident_orm.priority = incident.priority
+        incident_orm.created_at = incident.created_at
+        incident_orm.updated_at = incident.updated_at
+        incident_orm.resolved_at = incident.resolved_at
+        incident_orm.closed_at = incident.closed_at
+
+        self.session.add(incident_orm)
+        await self.session.commit()
+        await self.session.refresh(incident_orm)
+
+        return Incident(
+            id=incident_orm.id,
+            title=incident_orm.title,
+            description=incident_orm.description,
+            priority=incident_orm.priority,
+        )
+
+    async def get_all_incidents(
+        self,
+        limit: int | None = None,
+        offset: int | None = None,
+        status: str | None = None,
+        assigned_to: int | None = None,
+    ) -> list[Incident]:
+        """Get incidents with filtering"""
+
+        query = select(IncidentORM)
+
+        if status:
+            query = query.where(IncidentORM.status == status)
+        if assigned_to:
+            query = query.where(IncidentORM.incident_duties == assigned_to)
+
+        if limit:
+            query = query.limit(limit)
+        if offset:
+            query = query.offset(offset)
+
+        result = await self.session.execute(query)
+        incidents_orm = result.scalars().all()
+
+        return [self._orm_to_entity(orm) for orm in incidents_orm]
+
+    def _orm_to_entity(self, incident_orm: IncidentORM) -> Incident:
+        """Convert ORM model to domain entity"""
+
+        return Incident(
+            id=incident_orm.id,
+            title=incident_orm.title,
+            description=incident_orm.description,
+            priority=incident_orm.priority,
+        )
+
+    async def assign_to_duty(
+        self, incident_id: int, duty_id: int, assigned_by: int | None = None
+    ) -> None:
+        """Assign incident to duty"""
+        assignment = IncidentDutyORM(
+            incident_id=incident_id, duty_id=duty_id, assigned_by=assigned_by
+        )
+
+        self.session.add(assignment)
+        await self.session.commit()
+
+    async def get_incident_with_duties(self, incident_id: int) -> IncidentORM | None:
+        """Get incident with all assigned duties"""
+        stmt = (
+            select(IncidentORM)
+            .options(
+                selectinload(IncidentORM.incident_duties).selectinload(
+                    IncidentDutyORM.duty
+                )
+            )
+            .where(IncidentORM.id == incident_id)
+        )
+
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
+
+
+========== to_the_hell/oncallhub/infra/db/repositories/user_repository.py ==========
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from to_the_hell.oncallhub.domain.entities import User
+from to_the_hell.oncallhub.domain.repositories.user_repository import BaseUserRepository
+
+
+class PostgresUserRepository(BaseUserRepository):
+    """
+    PostgreSQL implementation of user repository
+    """
+
+    def __init__(self, session: AsyncSession):
+        """Initialize repository with async session"""
+        self.session = session
+
+    async def get_by_id(self, user_id: int) -> User | None:
+        """Get user by integer ID"""
+        return None
+
+
+========== to_the_hell/oncallhub/infra/db/session.py ==========
+
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    async_sessionmaker,
+    create_async_engine,
+)
+
+from to_the_hell.oncallhub.core.config import settings
+from to_the_hell.oncallhub.infra.db.models.base_orm import Base
+
+async_engine: AsyncEngine = create_async_engine(url=settings.get_database_url)
+async_session_factory = async_sessionmaker(async_engine, expire_on_commit=False)
+
+
+async def init_db() -> None:
+    """Initialize database tables"""
+    async with async_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+
+async def drop_db() -> None:
+    """Drop all database tables"""
+    async with async_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+
+
+========== to_the_hell/oncallhub/services/__init__.py ==========
+
+
+
+========== to_the_hell/oncallhub/workers/__init__.py ==========
+
+from .celery_app import celery_app
+
+__all__ = ["celery_app"]

@@ -1,9 +1,7 @@
-from uuid import UUID
-
 from pydantic import BaseModel
 
 
-class DevopsSchema(BaseModel):  # type: ignore[misc]
-    id: UUID
+class DevopsSchema(BaseModel):
+    id: int
     name: str
     telegram_username: str

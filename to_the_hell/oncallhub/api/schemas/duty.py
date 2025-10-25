@@ -1,13 +1,12 @@
 from datetime import datetime
-from uuid import UUID
 
 from pydantic import BaseModel
 
 
-class DutySchema(BaseModel):  # type: ignore[misc]
-    devops_id: UUID
+class DutySchema(BaseModel):
+    devops_id: int
     start_time: datetime
     end_time: datetime
     status: bool
-    id: UUID
+    id: int
     created_at: datetime | None = None

@@ -1,5 +1,5 @@
 from datetime import UTC, datetime, timedelta
-from uuid import uuid4
+from random import randint
 
 import pytest
 
@@ -15,9 +15,17 @@ class FakeDutyRepository(BaseDutyRepository):
 
     async def create(self, duty: Duty) -> Duty:
         """Create duty in memory"""
-        duty.id = uuid4()
+        duty.id = randint(0, 100000)
         self.duties.append(duty)
         return duty
+
+    async def get_current_duty(self) -> Duty | None:
+        """Get current duty - not implemented for tests"""
+        return None
+
+    async def get_all_duties(self) -> list[Duty]:
+        """Get all duties - not implemented for tests"""
+        return self.duties
 
 
 @pytest.mark.asyncio  # type: ignore[misc]
@@ -25,12 +33,18 @@ async def test_create_duty() -> None:
     """Test duty creation through repository"""
     repo = FakeDutyRepository()
 
-    devops = Devops(name="Test Devops", email="test@example.com")
-    duty_id = uuid4()
+    devops = Devops(
+        id=randint(0, 100000),
+        name="Test Devops",
+        telegram_chat_id="123134324",
+        email="test@example.com",
+        phone="8999999999",
+    )
+    duty_id = randint(0, 100000)
 
     duty = Duty(
         id=duty_id,
-        devops_id=devops.id or uuid4(),
+        devops_id=devops.id or randint(0, 100000),
         start_time=datetime.now(tz=UTC),
         end_time=datetime.now(tz=UTC) + timedelta(hours=8),
         status=True,

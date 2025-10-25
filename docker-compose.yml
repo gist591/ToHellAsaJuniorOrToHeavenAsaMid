@@ -1,6 +1,80 @@
 services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DATABASE_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --requirepass ${CELERY_REDIS_PASSWORD:-redis_pass}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${CELERY_REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   app:
     build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_HOST: db
+      CELERY_REDIS_HOST: redis
+    ports:
+      - "8000:8000"
     volumes:
       - .:/app
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: >
+      sh -c "
+      echo 'Waiting for database...' &&
+      while ! nc -z db 5432; do sleep 1; done &&
+      echo 'Running migrations...' &&
+      uv run alembic upgrade head &&
+      echo 'Starting server...' &&
+      uv run uvicorn to_the_hell.oncallhub.api.main:app --host 0.0.0.0 --port 8000 --reload
+      "
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_HOST: db
+      CELERY_REDIS_HOST: redis
+    volumes:
+      - .:/app
+    command: >
+      sh -c "
+      echo 'Waiting for redis...' &&
+      while ! nc -z redis 6379; do sleep 1; done &&
+      echo 'Starting Celery worker...' &&
+      uv run celery -A to_the_hell.oncallhub.workers.celery_app worker --loglevel=info
+      "
+    depends_on:
+      redis:
+        condition: service_healthy
+volumes:
+  postgres_data:
+  redis_data:

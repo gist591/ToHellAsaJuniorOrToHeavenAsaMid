@@ -4,7 +4,6 @@ from .repositories import (
     PostgresDutyRepository,
     PostgresIncidentRepository,
 )
-from .session import get_session
 
 __all__ = [
     "DevopsORM",
@@ -13,5 +12,4 @@ __all__ = [
     "PostgresDevopsRepository",
     "PostgresDutyRepository",
     "PostgresIncidentRepository",
-    "get_session",
 ]
