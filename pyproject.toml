@@ -25,6 +25,7 @@ dependencies = [
     "psycopg2>=2.9.11",
     "celery>=5.5.3",
     "pytest-cov>=6.2.1",
+    "redis>=6.4.0",
 ]
 
 [project.optional-dependencies]

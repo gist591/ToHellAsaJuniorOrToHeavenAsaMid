@@ -96,7 +96,7 @@ class PostgresDevopsRepository(BaseDevopsRepository):
         """Create new devops in database"""
         devops_orm = DevopsORM()
         devops_orm.name = devops.name
-        devops_orm.telegram_username = devops.telegram_username
+        devops_orm.telegram_chat_id = devops.telegram_chat_id
         devops_orm.email = devops.email
         devops_orm.phone = devops.phone
 
@@ -107,7 +107,7 @@ class PostgresDevopsRepository(BaseDevopsRepository):
         return Devops(
             id=devops_orm.id,
             name=devops_orm.name,
-            telegram_username=devops_orm.telegram_username,
+            telegram_chat_id=devops_orm.telegram_chat_id,
             email=devops_orm.email,
             phone=devops_orm.phone,
         )

@@ -9,6 +9,6 @@ class Devops:
 
     id: int
     name: str
-    telegram_username: str
+    telegram_chat_id: str
     email: str
     phone: str

@@ -1,6 +1,6 @@
-import uuid
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from random import randint
 from typing import Any
 
 import jwt
@@ -29,7 +29,7 @@ def create_token_pair(user_id: int, username: str) -> tuple[str, str]:
     """
     Create access and refresh token when login
     """
-    session_id = str(uuid.uuid4())
+    session_id = str(randint(0, 10000))
 
     access_payload = {
         "sub": str(user_id),

@@ -27,6 +27,10 @@ class DutyORM(AbstractORM):
         DateTime(timezone=True), default=datetime.now(UTC), nullable=False
     )
 
+    reminder_24h_sent: Mapped[bool] = mapped_column(default=False, nullable=False)
+    reminder_2h_sent: Mapped[bool] = mapped_column(default=False, nullable=False)
+    reminder_10m_sent: Mapped[bool] = mapped_column(default=False, nullable=False)
+
     devops: Mapped["DevopsORM"] = relationship(back_populates="duties")
 
     incident_duties: Mapped[list["IncidentDutyORM"]] = relationship(

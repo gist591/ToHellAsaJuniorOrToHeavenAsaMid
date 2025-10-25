@@ -4,7 +4,7 @@ from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 from to_the_hell.oncallhub.core.config import settings
-from to_the_hell.oncallhub.infra.db.models.base import Base
+from to_the_hell.oncallhub.infra.db.models.base_orm import Base
 
 config = context.config
 

@@ -1,4 +1,4 @@
-import uuid
+from random import randint
 
 import pytest
 
@@ -11,7 +11,7 @@ from to_the_hell.oncallhub.domain.value_objects.incident_priority import (
 @pytest.mark.asyncio  # type: ignore[misc]
 async def test_create_incident() -> None:
     devops = Devops(
-        id=uuid.uuid4(),
+        id=randint(0, 10000),
         name="Test Devops",
         telegram_username="hi",
         email="test@example.com",
@@ -19,7 +19,7 @@ async def test_create_incident() -> None:
     )
 
     incident = Incident(
-        id=uuid.uuid4(),
+        id=randint(0, 10000),
         title="Test Incident",
         description="Test Description",
         priority=IncidentPriority.HIGH,
@@ -35,7 +35,7 @@ async def test_create_incident() -> None:
 @pytest.mark.asyncio  # type: ignore[misc]
 async def test_incident_status_transition() -> None:
     devops = Devops(
-        id=uuid.uuid4(),
+        id=randint(0, 10000),
         name="Test Devops",
         telegram_username="hello",
         email="test@example.com",
@@ -43,7 +43,7 @@ async def test_incident_status_transition() -> None:
     )
 
     incident = Incident(
-        id=uuid.uuid4(),
+        id=randint(0, 10000),
         title="Test Incident",
         description="Test Description",
         priority=IncidentPriority.MEDIUM,
