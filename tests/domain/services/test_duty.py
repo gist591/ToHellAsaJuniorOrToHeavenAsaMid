@@ -36,7 +36,7 @@ async def test_create_duty() -> None:
     devops = Devops(
         id=randint(0, 100000),
         name="Test Devops",
-        telegram_username="@hello",
+        telegram_chat_id="123134324",
         email="test@example.com",
         phone="8999999999",
     )

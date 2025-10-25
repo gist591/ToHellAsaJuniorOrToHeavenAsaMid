@@ -12,13 +12,13 @@ def test_devops_creation() -> None:
     devops = Devops(
         id=randint(0, 100000),
         name="Test Devops",
-        telegram_username="go",
+        telegram_chat_id="12345135",
         email="test@example.com",
         phone="+1234567890",
     )
 
     assert devops.name == "Test Devops"
-    assert devops.telegram_username == "go"
+    assert devops.telegram_chat_id == "12345135"
     assert devops.email == "test@example.com"
     assert devops.phone == "+1234567890"
     assert devops.id

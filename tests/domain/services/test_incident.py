@@ -13,7 +13,7 @@ async def test_create_incident() -> None:
     devops = Devops(
         id=randint(0, 10000),
         name="Test Devops",
-        telegram_username="hi",
+        telegram_chat_id="123134234",
         email="test@example.com",
         phone="89997655656",
     )
@@ -37,7 +37,7 @@ async def test_incident_status_transition() -> None:
     devops = Devops(
         id=randint(0, 10000),
         name="Test Devops",
-        telegram_username="hello",
+        telegram_chat_id="1542545234",
         email="test@example.com",
         phone="89999999999",
     )
