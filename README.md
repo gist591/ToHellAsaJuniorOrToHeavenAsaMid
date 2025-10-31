@@ -174,6 +174,4 @@ Pydantic проверяет HTTP данные, обработчики коман
 
 ## Лицензия
 
-CC BY-NC-SA 4.0
-
-Подробнее: [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)
