@@ -125,32 +125,6 @@ async def update(id: int, data: Schema, bus: CommandBusDep):
     return result.data
 ```
 
-## Deployment
-
-Docker Compose для простых случаев, Kubernetes для скейлинга.
-
-Базовый `docker-compose.prod.yml`:
-```yaml
-services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-  
-  redis:
-    image: redis:7-alpine
-  
-  app:
-    image: oncallhub:latest
-    ports: ["8000:8000"]
-    depends_on: [db, redis]
-  
-  worker:
-    image: oncallhub:latest
-    command: celery -A ... worker
-```
-
 ## Roadmap
 
 - Email/SMS уведомления
@@ -162,3 +136,4 @@ services:
 ## Лицензия
 
 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
