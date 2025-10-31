@@ -151,19 +151,6 @@ services:
     command: celery -A ... worker
 ```
 
-Для прода добавь nginx с SSL и rate limiting.
-
-## Частые вопросы
-
-**Зачем Command Pattern?**
-Чтобы контроллеры не раздувались. Вся логика в обработчиках, контроллеры только переводят HTTP в команды.
-
-**Entity vs Value Object?**
-Entity если есть ID и меняется (Duty, Incident). Value Object если неизменяемый и определяется атрибутами (TimeRange).
-
-**Где валидация?**
-Pydantic проверяет HTTP данные, обработчики команд - бизнес-правила, Value Objects - инварианты.
-
 ## Roadmap
 
 - Email/SMS уведомления
